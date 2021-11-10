@@ -93,7 +93,7 @@ export default class HomeStaking extends Component {
 
       var claim = <></>;
 
-      if(Date.now() >= fin*1000){
+      if(Date.now() >= fin*1000 && parseInt(usuario) != 0){
         claim = (<><button className="btn btn-warning" onClick={() => this.retiro()}>Claim</button></>);
       }
 
