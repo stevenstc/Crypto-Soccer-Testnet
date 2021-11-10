@@ -12,6 +12,8 @@ export default class HomeStaking extends Component {
     this.balance = this.balance.bind(this);
     this.staking = this.staking.bind(this);
     this.myStake = this.myStake.bind(this);
+    this.retiro = this.retiro.bind(this);
+
   }
 
   async componentDidMount() {
@@ -85,10 +87,33 @@ export default class HomeStaking extends Component {
         stake = stake.toFixed(8);
       }
 
+      var fin = await this.props.wallet.contractStaking.methods
+      .fin()
+      .call({ from: this.props.currentAccount });
+
+      var claim = <></>;
+
+      if(Date.now() >= fin*1000){
+        claim = (<><button className="btn btn-warning" onClick={() => this.retiro()}>Claim</button></>);
+      }
+
     this.setState({
-      staked: stake
+      staked: stake,
+      claim: claim
     }) 
     
+  }
+
+  async retiro() {
+
+    var usuario = await this.props.wallet.contractStaking.methods
+      .usuarios(this.props.currentAccount)
+      .call({ from: this.props.currentAccount });
+
+    await this.props.wallet.contractStaking.methods
+      .retiro(usuario)
+      .send({ from: this.props.currentAccount })
+
   }
 
   render() {
@@ -116,7 +141,8 @@ export default class HomeStaking extends Component {
                     <img src="assets/img/STAKE.png" width="270px" />
                     <div class="centradoStake">
                       <h3 className=" pb-4">
-                      {this.state.staked} CSC</h3>
+                        {this.state.staked} CSC {" "} {this.state.claim}
+                      </h3>
                     </div>
                 </div>
 

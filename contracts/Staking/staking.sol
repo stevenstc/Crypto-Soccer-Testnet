@@ -124,7 +124,7 @@ contract StakingPool is Context, Admin{
   uint public TOTAL_POOL = 2085000 * 10**18;
   uint public CSC_WALLET_BALANCE;
   uint public TOTAL_PARTICIPACIONES;
-  uint public inicio = 1636440200;
+  uint public inicio = 1636578000;
   uint public fin = inicio + 30 * 86400;
   
   uint public precision = 18;
@@ -178,6 +178,10 @@ contract StakingPool is Context, Admin{
 
   }
   
+  function compra(uint _value) public view returns(uint){
+      return (_value.mul(10**precision)).div(RATE());
+  }
+  
   function staking(uint _value) public returns (uint) {
 
     if(block.timestamp < inicio || block.timestamp > fin)revert();
@@ -185,18 +189,20 @@ contract StakingPool is Context, Admin{
     if( CSC_Contract.balanceOf(msg.sender) < _value )revert();
     if( !CSC_Contract.transferFrom(msg.sender, address(this), _value) )revert();
       
-    uint tmp = _value;
-
-    _value = (_value.mul(10**precision)).div(RATE());
     Usuario storage usuario = usuarios[msg.sender];
     
-    usuario.participacion += _value;
-    TOTAL_PARTICIPACIONES += _value;
+    usuario.participacion += compra(_value);
+    TOTAL_PARTICIPACIONES += compra(_value);
     
-    CSC_WALLET_BALANCE += tmp;
+    CSC_WALLET_BALANCE += _value;
 
     return _value;
 
+  }
+  
+  function pago(uint _value) public view returns (uint256){
+      _value = _value.mul(RATE());
+      return _value.div(10**precision);
   }
 
   function retiro(uint _participacion) public returns (uint256){
@@ -207,20 +213,19 @@ contract StakingPool is Context, Admin{
 
     if(usuario.participacion < _participacion)revert();
     
-    uint pago = _participacion.mul(RATE());
-    pago = pago.div(10**precision);
-
-    if(CSC_WALLET_BALANCE.add(CSC_POOL_BALANCE()) < pago)revert();
+    uint _pago = pago(_participacion);
     
-    if( !CSC_Contract.transfer(msg.sender, pago) )revert();
+    if(CSC_WALLET_BALANCE.add(CSC_POOL_BALANCE()) < _pago)revert();
+    if( !CSC_Contract.transfer(msg.sender, _pago) )revert();
 
+    uint _ajuste = CSC_POOL_BALANCE();
     usuario.participacion -= _participacion;
     TOTAL_PARTICIPACIONES -= _participacion;
-    TOTAL_POOL -= CSC_POOL_BALANCE();
-    CSC_WALLET_BALANCE += CSC_POOL_BALANCE();
-    CSC_WALLET_BALANCE -= pago;
+    TOTAL_POOL -= _ajuste;
+    CSC_WALLET_BALANCE += _ajuste;
+    CSC_WALLET_BALANCE -= _pago;
 
-    return pago;
+    return pago(_participacion);
 
   }
 
