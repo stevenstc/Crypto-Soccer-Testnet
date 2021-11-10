@@ -52,19 +52,28 @@ export default class HomeStaking extends Component {
 
     amount = replaceAll(amount, ".", "" );
 
-    if(balance >= parseInt(valor*10**18)){
-      if (aprovado > 0) {
-        await this.props.wallet.contractStaking.methods
-        .staking(amount)
-        .send({ from: this.props.currentAccount });
-      }else{
-        await this.props.wallet.contractToken.methods
-        .approve(this.props.wallet.contractStaking._address, "115792089237316195423570985008687907853269984665640564039457584007913129639935")
-        .send({ from: this.props.currentAccount });
+    var inicio = await this.props.wallet.contractStaking.methods
+      .inicio()
+      .call({ from: this.props.currentAccount });
 
-      }
+    if(balance >= parseInt(valor*10**18)){
+        if (aprovado > 0) {
+          if (Date.now() >= inicio*1000) {
+            await this.props.wallet.contractStaking.methods
+            .staking(amount)
+            .send({ from: this.props.currentAccount });
+          }else{
+            alert("It's not time");
+          }
+        }else{
+          await this.props.wallet.contractToken.methods
+          .approve(this.props.wallet.contractStaking._address, "115792089237316195423570985008687907853269984665640564039457584007913129639935")
+          .send({ from: this.props.currentAccount });
+
+        }
+      
     }else{
-      alert("insuficient Founds")
+      alert("insuficient Founds");
     }
 
   }
