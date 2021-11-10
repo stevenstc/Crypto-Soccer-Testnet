@@ -5,7 +5,7 @@ const PRE = "https://precio-site.herokuapp.com/api/v1/servicio/precio/v2/SITE";
 const WS = false;//TESTNET
 
 const TokenTest = "0x038987095f309d3640F51644430dc6C7C4E2E409"; //token de pruebas
-const SCtest = "0xF0fB2227Ec1842C9BAb487b8938e85f84328002b";// contrato test market
+const SCtest = "0xfF7009EF7eF85447F6A5b3f835C81ADd60a321C9";// contrato test market
 const SC2test = "0xff57baBf3c55D7d5B39aac46883C2C5F0A4cec24";// contrado test fan youtuber
 const SC3test = "0xebCC8F716087B6Bd4AF31759B8F7041ebEC5E820";// contrado test Staking
 

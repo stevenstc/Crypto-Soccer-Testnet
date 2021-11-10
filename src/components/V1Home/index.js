@@ -12,7 +12,7 @@ export default class Home extends Component {
     setInterval(() => {
       this.balance();
       this.inventario();
-    }, 3 * 1000);
+    }, 7 * 1000);
   }
 
   async balance() {
@@ -22,33 +22,32 @@ export default class Home extends Component {
         .call({ from: this.props.currentAccount });
   }
 
-  inventario() {
+  async inventario() {
     document.getElementById("inventory").innerHTML = "";
 
-    this.props.wallet.contractMarket.methods
+    var result = await this.props.wallet.contractMarket.methods
       .largoInventario(this.props.currentAccount)
-      .call({ from: this.props.currentAccount })
-      .then(function (result) {
-        for (let index = 0; index < result; index++) {
-          this.props.wallet.contractMarket.methods
-            .inventario(this.props.currentAccount, index)
-            .call({ from: this.props.currentAccount })
-            .then(function (item) {
-              const div = document.createElement("div");
-              div.className = "col-lg-4 col-md-12 p-1";
+      .call({ from: this.props.currentAccount });
 
-              const img = document.createElement("img");
-              img.className = "pb-4";
+    for (let index = 0; index < result; index++) {
+      this.props.wallet.contractMarket.methods
+        .inventario(this.props.currentAccount, index)
+        .call({ from: this.props.currentAccount })
+        .then(function (item) {
+          const div = document.createElement("div");
+          div.className = "col-lg-4 col-md-12 p-1";
 
-              img.src = "assets/img/" + item.nombre + ".png";
+          const img = document.createElement("img");
+          img.className = "pb-4";
 
-              img.setAttribute("width", "100%");
+          img.src = "assets/img/" + item.nombre + ".png";
 
-              div.appendChild(img);
-              document.getElementById("inventory").appendChild(div);
-            });
-        }
-      });
+          img.setAttribute("width", "100%");
+
+          div.appendChild(img);
+          document.getElementById("inventory").appendChild(div);
+        });
+    }
   }
 
   render() {
