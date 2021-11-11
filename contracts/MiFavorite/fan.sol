@@ -110,14 +110,13 @@ contract Admin is Context, Ownable{
 contract Voter is Context, Admin{
   using SafeMath for uint256;
 
-  address token = 0x55d398326f99059fF775485246999027B3197955;
-  uint256[] fase = [1635872400, 1636225200, 1636311600, 1636329540];
-  uint256[] precios = [50*10**18, 75*10**18, 100*10**18]; 
-  TRC20_Interface CSC_Contract = TRC20_Interface(token);
+  address token = 0xF0fB4a5ACf1B1126A991ee189408b112028D7A63;
+  uint256[] fase = [1636743600, 1636830000, 1636916400];
+  uint256[] precios = [75*10**18, 100*10**18]; 
   
   struct Fan {
-      bool registrado;
-      bool[] items;
+    bool registrado;
+    bool[] items;
   }
 
   mapping (address => Fan) public fans;
@@ -128,6 +127,8 @@ contract Voter is Context, Admin{
   bool[] private base = items;
 
   uint256 public pool;
+
+  TRC20_Interface CSC_Contract = TRC20_Interface(token);
 
   constructor() {
       
@@ -177,6 +178,14 @@ contract Voter is Context, Admin{
       return block.timestamp;
   }
 
+  function inicio() public view returns(uint256){
+      return fase[0];
+  }
+
+  function fin() public view returns(uint256){
+      return fase[1];
+  }
+
   function valor() public view returns(uint256) {
       
       if(block.timestamp >= fase[0] && block.timestamp < fase[1]){
@@ -188,15 +197,8 @@ contract Voter is Context, Admin{
         return precios[1];
 
       }
-
-      if(block.timestamp >= fase[2] && block.timestamp < fase[3]){
-        return precios[2];
-
-      }
       
       return 0;
-
-      
 
   }
 
@@ -214,6 +216,22 @@ contract Voter is Context, Admin{
 
       return puntos;
       
+  }
+
+  function verGanador() public view returns(bool, uint){
+    Fan memory fan = fans[_msgSender()];
+
+      uint256 posicion;
+      bool hayGanador;
+      for (uint256 index = 0; index < items.length; index++) {
+          if(items[index] && fan.items[index]){
+            posicion = index;
+            hayGanador = true;
+          }
+          
+      }
+
+      return (hayGanador, posicion);
   }
 
   function votar(uint256 _item) public returns(bool){  
@@ -237,10 +255,8 @@ contract Voter is Context, Admin{
         pool += valor();
         return true;
     }else{
-        return false;
+        revert("ya no se puede votar");
     }
-    
-    
 
   }
 
@@ -250,7 +266,7 @@ contract Voter is Context, Admin{
     if(CSC_Contract.balanceOf(address(this)) < ganador() )revert("saldo insuficiente en el contrato");
     if(!CSC_Contract.transfer(_msgSender(), ganador() ) )revert("transaccion fallida");
 
-    Fan memory fan = fans[_msgSender()];
+    Fan storage fan = fans[_msgSender()];
     fan.items = base;
     return ganador();
 
@@ -259,6 +275,18 @@ contract Voter is Context, Admin{
   function ReIniciar() public onlyOwner returns(bool){  
     
     items = base;
+
+    for (uint256 index = 0; index < base.length; index++) {
+      votos[index] = 0;
+    }
+    
+    return true;
+
+  }
+
+  function updateBase(bool[] memory _base) public onlyOwner returns(bool){  
+    
+    base = _base;
 
     return true;
 

@@ -45,16 +45,28 @@ export default class HomeStaking extends Component {
     var amount = (valor*10**18).toLocaleString();
 
     function replaceAll( text, busca, reemplaza ){
-      while (text.toString().indexOf(busca) != -1)
+      while (text.toString().indexOf(busca) !== -1)
           text = text.toString().replace(busca,reemplaza);
       return text;
     }
 
-    amount = replaceAll(amount, ".", "" );
+    amount = await replaceAll(amount, ".", "" );
+    amount = await replaceAll(amount, ",", "" );
+
+    console.log(amount);
 
     var inicio = await this.props.wallet.contractStaking.methods
       .inicio()
       .call({ from: this.props.currentAccount });
+
+    var fin = await this.props.wallet.contractStaking.methods
+      .fin()
+      .call({ from: this.props.currentAccount });
+
+    if(Date.now() >= fin*1000 ){
+      alert("staking ended");
+      return;
+    }
 
     if(balance >= parseInt(valor*10**18)){
         if (aprovado > 0) {
@@ -102,7 +114,7 @@ export default class HomeStaking extends Component {
 
       var claim = <></>;
 
-      if(Date.now() >= fin*1000 && parseInt(usuario) != 0){
+      if(Date.now() >= fin*1000 && parseInt(usuario) !== 0){
         claim = (<><button className="btn btn-warning" onClick={() => this.retiro()}>Claim</button></>);
       }
 
@@ -143,11 +155,11 @@ export default class HomeStaking extends Component {
 
               <div className="row justify-content-md-center mt-5">
                 <div className="col-md-auto text-center position-relative">
-                    <img src="assets/img/stake01.png" width="270px" />
+                    <img src="assets/img/stake01.png" width="270px" alt=""/>
                 </div>
 
                 <div className="col-md-auto text-center position-relative">
-                    <img src="assets/img/STAKE.png" width="270px" />
+                    <img src="assets/img/STAKE.png" width="270px"  alt=""/>
                     <div class="centradoStake">
                       <h3 className=" pb-4">
                         {this.state.staked} CSC {" "} {this.state.claim}
@@ -156,7 +168,7 @@ export default class HomeStaking extends Component {
                 </div>
 
                 <div className="col-md-auto text-center position-relative">
-                    <img src="assets/img/stake02.png" width="270px" />
+                    <img src="assets/img/stake02.png" width="270px"  alt=""/>
                 </div>
 
               </div>

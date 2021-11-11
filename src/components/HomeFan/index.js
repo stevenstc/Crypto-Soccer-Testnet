@@ -38,8 +38,6 @@ export default class HomeFan extends Component {
 
   async votar(id) {
 
-    console.log(this.props.wallet.contractFan._address)
-
     var aprovado = await this.props.wallet.contractToken.methods
       .allowance(this.props.currentAccount, this.props.wallet.contractFan._address)
       .call({ from: this.props.currentAccount });
@@ -78,16 +76,25 @@ export default class HomeFan extends Component {
       .largoItems()
       .call({ from: this.props.currentAccount });
 
+    var fin = await this.props.wallet.contractFan.methods
+      .fin()
+      .call({ from: this.props.currentAccount });
+
     for (let index = 0; index < result; index++) {
 
       var valor = await this.props.wallet.contractFan.methods
         .valor()
         .call({ from: this.props.currentAccount });
 
-        console.log(valor)
+       //console.log(valor)
 
-      if(valor == 0){
-        valor = "Soon...";
+      if(valor === "0"){
+        if(Date.now() >= fin*1000){
+          valor = "Finished";
+        }else{
+          valor = "Soon...";
+        }
+        
       }else{
         valor = valor/10**18;
       }
@@ -139,6 +146,31 @@ export default class HomeFan extends Component {
       var invent = await this.props.wallet.contractFan.methods
         .verFanItems(this.props.currentAccount, index)
         .call({ from: this.props.currentAccount });
+
+      var verGanador = await this.props.wallet.contractFan.methods
+      .verGanador()
+      .call({ from: this.props.currentAccount });
+
+      var claim = (<></>);
+
+        if(verGanador[0]){
+
+          if (verGanador[1] === index+""){
+
+            claim = (
+            <div
+              className="position-relative btn-monedas"
+              onClick={() => this.votar(index)}
+            >
+              <span className="position-absolute top-50 end-0 translate-middle-y p-5">
+                Claim
+              </span>
+            </div>
+            );
+          }
+
+        }
+        
         
       if (invent) {
         myInventario[index] = (
@@ -152,6 +184,7 @@ export default class HomeFan extends Component {
                 alt=""
               />
               <p>{votos} global votes</p>
+              {claim}
             </div>
           </>
         );

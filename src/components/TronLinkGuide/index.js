@@ -29,7 +29,7 @@ const TronLinkGuide = props => {
                     <div className='col-sm-8 bg-secondary text-white'>
                         <h1>Install Metamask</h1>
                         <p>
-                            To create a post or tip others you must install Metamask. Metamask is a wallet that you can download at <a href={ WEBSTORE_URL } target='_blank' rel='noopener noreferrer'></a>.
+                            To create a post or tip others you must install Metamask. Metamask is a wallet that you can download at <a href={ WEBSTORE_URL } target='_blank' rel='noopener noreferrer'>Metamask web page</a>.
                             Once installed, go back and refresh the page.
                         </p>
                     </div>
