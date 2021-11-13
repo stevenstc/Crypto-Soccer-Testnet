@@ -160,7 +160,7 @@ export default class HomeStaking extends Component {
 
                 <div className="col-md-auto text-center position-relative">
                     <img src="assets/img/STAKE.png" width="270px"  alt=""/>
-                    <div class="centradoStake">
+                    <div className="centradoStake">
                       <h3 className=" pb-4">
                         {this.state.staked} CSC {" "} {this.state.claim}
                       </h3>

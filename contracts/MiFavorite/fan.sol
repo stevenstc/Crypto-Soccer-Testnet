@@ -121,8 +121,16 @@ contract Voter is Context, Admin{
 
   mapping (address => Fan) public fans;
 
-  bool[] public items = [false, false, false, false, false];
-  uint256[] public votos = [0,0,0,0,0];
+  bool[] public items = [
+    false, false, false, false, false,
+    false, false, false, false, false,
+    false, false, false, false, false, false
+  ];
+  uint256[] public votos = [
+    0,0,0,0,0,
+    0,0,0,0,0,
+    0,0,0,0,0,0
+  ];
 
   bool[] private base = items;
 

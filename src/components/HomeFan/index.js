@@ -80,6 +80,18 @@ export default class HomeFan extends Component {
       .fin()
       .call({ from: this.props.currentAccount });
 
+      //{filter:"grayscale(100%)"}
+
+    var eliminated = [
+      {},{},{},
+      {},{},{},
+      {},{},{},
+      {},{},{},
+      {},{},{},
+      {}
+
+    ];
+
     for (let index = 0; index < result; index++) {
 
       var valor = await this.props.wallet.contractFan.methods
@@ -99,31 +111,39 @@ export default class HomeFan extends Component {
         valor = valor/10**18;
       }
 
+      if(eliminated[index].filter){
+        valor = "Eliminated";
+      }
+
       var votos = await this.props.wallet.contractFan.methods
         .votos(index)
         .call({ from: this.props.currentAccount });
 
       itemsYoutube[index] = (
-        <>
-          <div className="col-lg-4 col-md-12 p-4 mb-5 text-center monedas" key={`items-${index}`}>
-            <h2 className=" pb-4">YouTuber #{index+1}</h2>
+          <div className="col-lg-3 col-md-12 p-3 mb-5 text-center monedas position-relative" key={`items-${index}`}>
+            <h2 className=" pb-2">YouTuber #{index+1}</h2>
             <img
-              className=" pb-4"
+              className=" pb-2"
               src={"assets/img/youTuber" + index + ".png"}
+              style={eliminated[index]} 
               width="100%"
               alt=""
             />
-            <p>{votos} votes</p>
+
+            <h2 className="centradoStake">
+              <b>{votos} votes</b>
+            </h2>
+            
             <div
               className="position-relative btn-monedas"
               onClick={() => this.votar(index)}
             >
-              <span className="position-absolute top-50 end-0 translate-middle-y p-5">
+              <span className="position-absolute top-50 end-0 translate-middle-y p-5" key="vdaj62">
                 {valor}
               </span>
             </div>
+            
           </div>
-        </>
       );
     }
 
@@ -174,7 +194,6 @@ export default class HomeFan extends Component {
         
       if (invent) {
         myInventario[index] = (
-          <>
             <div className="col-lg-4 col-md-12 p-4 mb-5 text-center monedas" key={`items-${index}`}>
               <h2 className=" pb-4">YouTuber #{index+1}</h2>
               <img
@@ -186,7 +205,6 @@ export default class HomeFan extends Component {
               <p>{votos} global votes</p>
               {claim}
             </div>
-          </>
         );
       }
     }
