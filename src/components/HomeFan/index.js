@@ -120,7 +120,7 @@ export default class HomeFan extends Component {
         .call({ from: this.props.currentAccount });
 
       itemsYoutube[index] = (
-          <div className="col-lg-3 col-md-12 p-3 mb-5 text-center monedas position-relative" key={`items-${index}`}>
+          <div className="col-lg-3 col-md-6 p-3 mb-5 text-center monedas position-relative" key={`items-${index}`}>
             <h2 className=" pb-2">YouTuber #{index+1}</h2>
             <img
               className=" pb-2"
