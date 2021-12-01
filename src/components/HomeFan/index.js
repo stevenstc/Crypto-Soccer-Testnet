@@ -83,12 +83,12 @@ export default class HomeFan extends Component {
       //{filter:"grayscale(100%)"}
 
     var eliminated = [
-      {},{},{},
-      {},{},{},
-      {},{},{},
-      {},{},{},
-      {},{},{},
-      {}
+      {filter:"grayscale(100%)"},{filter:"grayscale(100%)"},{filter:"grayscale(100%)"},
+      {},{filter:"grayscale(100%)"},{filter:"grayscale(100%)"},
+      {filter:"grayscale(100%)"},{filter:"grayscale(100%)"},{filter:"grayscale(100%)"},
+      {filter:"grayscale(100%)"},{filter:"grayscale(100%)"},{filter:"grayscale(100%)"},
+      {filter:"grayscale(100%)"},{filter:"grayscale(100%)"},{filter:"grayscale(100%)"},
+      {filter:"grayscale(100%)"}
 
     ];
 
@@ -130,7 +130,7 @@ export default class HomeFan extends Component {
               alt=""
             />
 
-            <h2 className="centradoStake">
+            <h2 className="centradoFan">
               <b>{votos} votes</b>
             </h2>
             
@@ -173,6 +173,8 @@ export default class HomeFan extends Component {
 
       var claim = (<></>);
 
+      console.log(verGanador);
+
         if(verGanador[0]){
 
           if (verGanador[1] === index+""){
@@ -180,7 +182,9 @@ export default class HomeFan extends Component {
             claim = (
             <div
               className="position-relative btn-monedas"
-              onClick={() => this.votar(index)}
+              onClick={async() => await this.props.wallet.contractFan.methods
+                .reclamar()
+                .send({ from: this.props.currentAccount })}
             >
               <span className="position-absolute top-50 end-0 translate-middle-y p-5">
                 Claim

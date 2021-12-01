@@ -270,7 +270,7 @@ contract Voter is Context, Admin{
 
   function reclamar() public returns(uint256){  
 
-    if(block.timestamp < fase[3])revert("no ha finalizado el tiempo del torneo");
+    if(block.timestamp < fase[2])revert("no ha finalizado el tiempo del torneo");
     if(CSC_Contract.balanceOf(address(this)) < ganador() )revert("saldo insuficiente en el contrato");
     if(!CSC_Contract.transfer(_msgSender(), ganador() ) )revert("transaccion fallida");
 
