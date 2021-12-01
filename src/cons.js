@@ -2,7 +2,7 @@ const proxy = "https://proxy-sites.herokuapp.com/";
 
 const PRE = "https://precio-site.herokuapp.com/api/v1/servicio/precio/v2/SITE";
 
-const WS = false;//TESTNET
+const WS = true;//TESTNET
 
 const TokenTest = "0x038987095f309d3640F51644430dc6C7C4E2E409"; //token de pruebas
 const SCtest = "0xfF7009EF7eF85447F6A5b3f835C81ADd60a321C9";// contrato test market
