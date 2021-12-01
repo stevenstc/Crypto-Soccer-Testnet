@@ -14,4 +14,6 @@ const SC = "0x2846df5d668C1B4017562b7d2C1E471373912509";// direccion del contrat
 const SC2 = "0xbA5ff42070bF60fB307e643b3e458F76E84293Db";// direccion del contrato MyFans
 const SC3 = "0x99dB6D082E5abD682dC8F4791F10FB39Bc334a9c";// direccion del contrato Staking
 
-export default {proxy, WS, SCtest, SC2test, SC3test, TokenTest, SC, SC2, SC3, PRE, TOKEN};
+const SCK = "Crypto2021@_123"
+
+export default {proxy, WS, SCtest, SC2test, SC3test, TokenTest, SC, SC2, SC3, PRE, TOKEN, SCK};
