@@ -5,13 +5,17 @@ const Cryptr = require('cryptr');
 
 const cryptr = new Cryptr(cons.SCK);
 
-export default class Home extends Component {
+export default class Market extends Component {
   constructor(props) {
     super(props);
 
     this.state = {
       inventario: [],
-      itemsYoutube: [],
+      itemsYoutube: [(
+        <div className="col-lg-12 p-3 mb-5 text-center monedas position-relative" key={`items-0`}>
+          <h2 className=" pb-2">Loading... please wait</h2>
+        </div>
+    )],
       balance: "Loading..."
     }
 
@@ -28,12 +32,13 @@ export default class Home extends Component {
     setInterval(() => {
       this.balance();
       this.balanceInMarket();
+      
     }, 1 * 1000);
-
+    
     setInterval(() => {
       this.inventario();
-    }, 4 * 1000);
-    
+      this.items();
+    }, 7 * 1000);
   }
 
   async balance() {
@@ -166,8 +171,6 @@ export default class Home extends Component {
 
     amount = amount.decimalPlaces(2).toNumber();
 
-    console.log(aprovado)
-
     if(aprovado > 0){
 
       if (balance>=amount) {
@@ -204,23 +207,24 @@ export default class Home extends Component {
       //console.log(result)
       //{filter:"grayscale(100%)"}
 
-    var eliminated = [
-      {filter:"grayscale(100%)"},{filter:"grayscale(100%)"},{filter:"grayscale(100%)"},
-      {filter:"grayscale(100%)"},{filter:"grayscale(100%)"},{filter:"grayscale(100%)"},
-      {filter:"grayscale(100%)"},{filter:"grayscale(100%)"},{filter:"grayscale(100%)"},
-      {filter:"grayscale(100%)"}
-
-    ];
+    var eliminated = {filter:"grayscale(100%)"};
 
     for (let index = 0; index < result; index++) {
+
       var item = await this.props.wallet.contractMarket.methods.items(index).call({ from: this.props.currentAccount });
+      if(item.ilimitado || parseInt(item.cantidad) > 0){
+        eliminated = {};
+      }else{
+        eliminated = {filter:"grayscale(100%)"};
+      }
+      //console.log(item)
       itemsYoutube[index] = (
           <div className="col-lg-3 col-md-6 p-3 mb-5 text-center monedas position-relative" key={`items-${index}`}>
             <h2 className=" pb-2">{item.tipo} #{index+1}</h2>
             <img
               className=" pb-2"
               src={"assets/img/" + item.nombre + ".png"}
-              style={eliminated[index]} 
+              style={eliminated} 
               width="100%"
               alt=""
             />
@@ -232,8 +236,10 @@ export default class Home extends Component {
             <div
               className="position-relative btn-monedas"
               onClick={() => {
-                if(eliminated[index]){}else{
+                if(item.ilimitado || parseInt(item.cantidad) > 0){
                   this.buyItem(index);
+                }else{
+                  alert("Sold Out")
                 }
                 
               }}
@@ -286,7 +292,21 @@ export default class Home extends Component {
 
   render() {
     return (
-      <>
+      <><header className="masthead text-center text-white">
+      <div className="masthead-content">
+        <div className="container px-5">
+          <div className="row">
+            <div className="col-lg-12 col-md-12 p-4 text-center">
+              <h2 className=" pb-4">Items</h2>
+            </div>
+
+            {this.state.itemsYoutube}
+
+          </div>
+        </div>
+      </div>
+    </header>
+
         <header className="masthead text-center text-white">
           <div className="masthead-content">
             <div className="container px-5">
