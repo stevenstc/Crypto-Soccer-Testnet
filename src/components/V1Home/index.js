@@ -90,7 +90,7 @@ export default class Home extends Component {
     var gastado = investor.gastado;
     var email = investor.correo;
 
-    console.log(investor);
+    //console.log(investor);
 
     if (email === "") {
       email = "Please update your email";
@@ -124,7 +124,7 @@ export default class Home extends Component {
     balance = balance.decimalPlaces(6)
     balance = balance.toString();
 
-    console.log(balance)
+    //console.log(balance)
 
     this.setState({
       balance: balance
@@ -144,24 +144,57 @@ export default class Home extends Component {
   }
 
   async buyCoins(amount){
-    amount = (amount*10**18).toLocaleString();
 
-    function replaceAll( text, busca, reemplaza ){
-      while (text.toString().indexOf(busca) !== -1)
-          text = text.toString().replace(busca,reemplaza);
-      return text;
-    }
+    var aprovado = await this.props.wallet.contractToken.methods
+      .allowance(this.props.currentAccount, this.props.wallet.contractMarket._address)
+      .call({ from: this.props.currentAccount });
 
-    amount = await replaceAll(amount, ".", "" );
-    amount = await replaceAll(amount, ",", "" );
+    aprovado = new BigNumber(aprovado);
+    aprovado = aprovado.shiftedBy(-18);
+    aprovado = aprovado.decimalPlaces(2).toNumber();
 
-    var result = await this.props.wallet.contractMarket.methods
-      .buyCoins(amount)
+    var balance = await this.props.wallet.contractToken.methods
+    .balanceOf(this.props.currentAccount)
+    .call({ from: this.props.currentAccount });
+
+    balance = new BigNumber(balance);
+    balance = balance.shiftedBy(-18);
+    balance = balance.decimalPlaces(2).toNumber();
+
+    amount = new BigNumber(amount);
+    var compra = amount.multipliedBy(10**18).toString();
+
+    amount = amount.decimalPlaces(2).toNumber();
+
+    console.log(aprovado)
+
+    if(aprovado > 0){
+
+      if (balance>=amount) {
+
+        var result = await this.props.wallet.contractMarket.methods
+        .buyCoins(compra)
+        .send({ from: this.props.currentAccount });
+  
+        if(result){
+          alert("coins buyed");
+        }
+        
+      }else{
+        alert("insuficient founds")
+      }
+
+    }else{
+      alert("insuficient aproved balance")
+      await this.props.wallet.contractToken.methods
+      .approve(this.props.wallet.contractMarket._address, "115792089237316195423570985008687907853269984665640564039457584007913129639935")
       .send({ from: this.props.currentAccount });
 
-    if(result){
-      alert("coins buyed");
     }
+
+    
+
+    
   }
 
   async items() {
@@ -214,7 +247,7 @@ export default class Home extends Component {
 
     }
 
-    console.log(itemsYoutube);
+    //console.log(itemsYoutube);
 
     this.setState({
       itemsYoutube: itemsYoutube,
@@ -294,7 +327,12 @@ export default class Home extends Component {
                   </div>
                 </div>
 
-                <div className="col-lg-4 col-md-12 p-4 monedas">
+                <div 
+                  className="col-lg-4 col-md-12 p-4 monedas"
+                  onClick={() => this.buyCoins(500)}
+                
+                >
+                  
                   <h2 className=" pb-4">PREMIUM</h2>
                   <img
                     className=" pb-4"
@@ -311,7 +349,10 @@ export default class Home extends Component {
                   </div>
                 </div>
 
-                <div className="col-lg-4 col-md-12 p-4 monedas">
+                <div 
+                  className="col-lg-4 col-md-12 p-4 monedas"
+                  onClick={() => this.buyCoins(1000)}
+                >
                   <h2 className=" pb-4">GOLD</h2>
                   <img
                     className=" pb-4"
