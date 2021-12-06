@@ -10,6 +10,7 @@ export default class Market extends Component {
     super(props);
 
     this.state = {
+      loading: false,
       inventario: [],
       itemsYoutube: [(
         <div className="col-lg-12 p-3 mb-5 text-center monedas position-relative" key={`items-0`}>
@@ -33,12 +34,12 @@ export default class Market extends Component {
       this.balance();
       this.balanceInMarket();
       
-    }, 1 * 1000);
+    }, 3 * 1000);
     
-    setInterval(() => {
+    setInterval(async() => {
       this.inventario();
       this.items();
-    }, 7 * 1000);
+    }, 4 * 1000);
   }
 
   async balance() {
@@ -195,70 +196,69 @@ export default class Market extends Component {
 
     }
 
-    
-
-    
   }
 
   async items() {
-    var itemsYoutube = [];
+    if(!this.state.loading){
+      this.setState({
+        loading: true
+      });
 
-    var result = await this.props.wallet.contractMarket.methods.largoItems().call({ from: this.props.currentAccount });
-      //console.log(result)
-      //{filter:"grayscale(100%)"}
+      var itemsYoutube = [];
 
-    var eliminated = {filter:"grayscale(100%)"};
+      var result = await this.props.wallet.contractMarket.methods.largoItems().call({ from: this.props.currentAccount });
+        //console.log(result)
+        //{filter:"grayscale(100%)"}
 
-    for (let index = 0; index < result; index++) {
+      for (let index = 0; index < result; index++) {
 
-      var item = await this.props.wallet.contractMarket.methods.items(index).call({ from: this.props.currentAccount });
-      if(item.ilimitado || parseInt(item.cantidad) > 0){
-        eliminated = {};
-      }else{
-        eliminated = {filter:"grayscale(100%)"};
-      }
-      //console.log(item)
-      itemsYoutube[index] = (
-          <div className="col-lg-3 col-md-6 p-3 mb-5 text-center monedas position-relative" key={`items-${index}`}>
-            <h2 className=" pb-2">{item.tipo} #{index+1}</h2>
-            <img
-              className=" pb-2"
-              src={"assets/img/" + item.nombre + ".png"}
-              style={eliminated} 
-              width="100%"
-              alt=""
-            />
+        var item = await this.props.wallet.contractMarket.methods.items(index).call({ from: this.props.currentAccount });
+        if(item.ilimitado || parseInt(item.cantidad) > 0){
+          var eliminated = {};
+        }else{
+          eliminated = {filter:"grayscale(100%)"};
+        }
+        //console.log(item)
+        itemsYoutube[index] = (
+            <div className="col-lg-3 col-md-6 p-3 mb-5 text-center monedas position-relative" key={`items-${index}`}>
+              <h2 className=" pb-2">{item.tipo} #{index+1}</h2>
+              <img
+                className=" pb-2"
+                src={"assets/img/" + item.nombre + ".png"}
+                style={eliminated} 
+                width="100%"
+                alt=""
+              />
 
-            <h2 className="centradoFan">
-              <b></b>
-            </h2>
-            
-            <div
-              className="position-relative btn-monedas"
-              onClick={() => {
-                if(item.ilimitado || parseInt(item.cantidad) > 0){
-                  this.buyItem(index);
-                }else{
-                  alert("Sold Out")
-                }
-                
-              }}
-            >
-              <span className="position-absolute top-50 end-0 translate-middle-y p-5" key="vdaj62">
-                {item.valor/10**18}
-              </span>
+              <h2 className="centradoFan">
+                <b></b>
+              </h2>
+              
+              <div
+                className="position-relative btn-monedas"
+                onClick={() => {
+                  if(item.ilimitado || parseInt(item.cantidad) > 0){
+                    this.buyItem(index);
+                  }else{
+                    alert("Sold Out")
+                  }
+                  
+                }}
+              >
+                <span className="position-absolute top-50 end-0 translate-middle-y p-5" >
+                  {item.valor/10**18}
+                </span>
+              </div>
             </div>
-          </div>
-      );
+        );
 
+      }
+
+      this.setState({
+        itemsYoutube: itemsYoutube,
+        loading: false
+      });
     }
-
-    //console.log(itemsYoutube);
-
-    this.setState({
-      itemsYoutube: itemsYoutube,
-    });
-
     
   }
 
