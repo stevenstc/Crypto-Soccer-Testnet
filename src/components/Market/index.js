@@ -276,10 +276,12 @@ export default class Market extends Component {
         .inventario(this.props.currentAccount, index)
         .call({ from: this.props.currentAccount });
 
+        console.log(item)
+
         inventario[index] = (
 
-          <div className="col-lg-4 col-md-12 p-1" key={`itemsTeam-${index}`}>
-            <img className="pb-4" src={"assets/img/" + item.nombre + ".png"} width="100%" alt={"team "+item.nombre} />
+          <div className="col-md-3 p-1" key={`itemsTeam-${index}`}>
+            <img className="pb-4" src={"assets/img/" + item.nombre + ".png"} width="100%" alt={"team-"+item.nombre} />
           </div>
 
         )
