@@ -28,7 +28,7 @@ export default class Home extends Component {
     setInterval(() => {
       this.balance();
       this.balanceInMarket();
-    }, 1 * 1000);
+    }, 3 * 1000);
 
     setInterval(() => {
       this.inventario();
@@ -165,8 +165,6 @@ export default class Home extends Component {
     var compra = amount.shiftedBy(18);
 
     amount = amount.decimalPlaces(2).toNumber();
-
-    console.log(aprovado)
 
     if(aprovado > 0){
 

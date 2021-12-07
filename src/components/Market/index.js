@@ -276,7 +276,7 @@ export default class Market extends Component {
         .inventario(this.props.currentAccount, index)
         .call({ from: this.props.currentAccount });
 
-        console.log(item)
+        //console.log(item)
 
         inventario[index] = (
 
