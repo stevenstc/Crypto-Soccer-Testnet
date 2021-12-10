@@ -48,36 +48,56 @@ class App extends Component {
   async componentDidMount() {
 
       if (typeof window.ethereum !== 'undefined') {           
-        var resultado = await window.ethereum.request({ method: 'eth_requestAccounts' });
-          console.log(resultado[0]);
+        window.ethereum.request({ method: 'eth_requestAccounts' })
+        .then((accounts) => {
+          //console.log(accounts)
           this.setState({
-            currentAccount: resultado[0],
+            currentAccount: accounts[0],
             metamask: true,
             conectado: true
           })
+        })
+        .catch((error) => {
+          console.error(error)
+          this.setState({
+            metamask: false,
+            conectado: false
+          })   
+        });
 
-      } else {          
+      } else {    
         this.setState({
           metamask: false,
           conectado: false
-        })      
+        })         
+           
       }
 
       setInterval(async() => {
         if (typeof window.ethereum !== 'undefined') {           
-          var resultado = await window.ethereum.request({ method: 'eth_requestAccounts' });
-            //console.log(resultado[0]);
+          window.ethereum.request({ method: 'eth_requestAccounts' })
+          .then((accounts) => {
+            //console.log(accounts)
             this.setState({
-              currentAccount: resultado[0],
+              currentAccount: accounts[0],
               metamask: true,
               conectado: true
             })
+          })
+          .catch((error) => {
+            console.error(error)
+            this.setState({
+              metamask: false,
+              conectado: false
+            })   
+          });
   
-        } else {          
+        } else {    
           this.setState({
             metamask: false,
             conectado: false
-          })      
+          })         
+             
         }
 
       },7*1000);

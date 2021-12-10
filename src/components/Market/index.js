@@ -61,27 +61,30 @@ export default class Market extends Component {
   }
 
   async updateEmail() {
-    var email = await window.prompt("enter your email");
-    const encryptedString = cryptr.encrypt(email);
-
+    var email = "example@gmail.com";
+    email = await window.prompt("enter your email", "example@gmail.com");
+    
     var investor =
       await this.props.wallet.contractMarket.methods
         .investors(this.props.currentAccount)
         .call({ from: this.props.currentAccount });
 
-    if (investor.registered) {
-      await this.props.wallet.contractMarket.methods
-        .updateRegistro(encryptedString)
-        .send({ from: this.props.currentAccount });
-    }else{
-      await this.props.wallet.contractMarket.methods
-        .registro(encryptedString)
-        .send({ from: this.props.currentAccount });
+    if(window.confirm("is correct?: "+email)){
+      const encryptedString = cryptr.encrypt(email);
+      if (investor.registered) {
+        await this.props.wallet.contractMarket.methods
+          .updateRegistro(encryptedString)
+          .send({ from: this.props.currentAccount });
+      }else{
+        await this.props.wallet.contractMarket.methods
+          .registro(encryptedString)
+          .send({ from: this.props.currentAccount });
+      }
+
+      alert("email Updated");
+
     }
     
-    alert("email Updated");
- 
-
   }
 
   async balanceInMarket() {
