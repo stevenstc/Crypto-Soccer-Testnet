@@ -27,19 +27,23 @@ export default class Market extends Component {
     this.items = this.items.bind(this);
     this.buyItem = this.buyItem.bind(this);
     this.updateEmail = this.updateEmail.bind(this);
+    this.update = this.update.bind(this);
+
   }
 
   async componentDidMount() {
-    setInterval(() => {
-      this.balance();
-      this.balanceInMarket();
-      
-    }, 3 * 1000);
-    
-    setInterval(async() => {
-      this.inventario();
-      this.items();
-    }, 4 * 1000);
+
+    await this.update();
+
+  }
+
+  async update() {
+
+    await this.balance();
+    await this.balanceInMarket();
+    await this.inventario();
+    await this.items();
+
   }
 
   async balance() {
@@ -84,6 +88,8 @@ export default class Market extends Component {
       alert("email Updated");
 
     }
+
+    this.update();
     
   }
 
@@ -150,6 +156,8 @@ export default class Market extends Component {
       alert("item buy");
     }
 
+    this.update();
+
   }
 
   async buyCoins(amount){
@@ -198,6 +206,8 @@ export default class Market extends Component {
       .send({ from: this.props.currentAccount });
 
     }
+
+    this.update();
 
   }
 
@@ -402,6 +412,13 @@ export default class Market extends Component {
               <span>
                 Current balance: {this.state.balance}
               </span>
+              <br />
+              <button
+                className="btn btn-success"
+                onClick={() => this.update()}
+              >
+                Refresh
+              </button>
               <hr />
             </div>
 
@@ -447,12 +464,13 @@ export default class Market extends Component {
                 alt="markert info"/>
 
             <h3>IN GAME</h3>
-              email: {this.state.email} {" "}
+              email: {this.state.email}
+              <br />
               <button
-                className="btn btn-primary"
+                className="btn btn-info"
                 onClick={() => this.updateEmail()}
               >
-                Update
+                Update Email
               </button>
               <br />
               <span>

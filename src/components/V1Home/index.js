@@ -22,18 +22,19 @@ export default class Home extends Component {
     this.items = this.items.bind(this);
     this.buyItem = this.buyItem.bind(this);
     this.updateEmail = this.updateEmail.bind(this);
+    this.update = this.update.bind(this);
   }
 
   async componentDidMount() {
-    setInterval(() => {
-      this.balance();
-      this.balanceInMarket();
-    }, 3 * 1000);
 
-    setInterval(() => {
-      this.inventario();
-    }, 4 * 1000);
+    await this.update();
     
+  }
+
+  async update() {
+    await this.balance();
+    await this.balanceInMarket();
+    await this.inventario();
   }
 
   async balance() {
@@ -81,6 +82,7 @@ export default class Home extends Component {
       alert("email Updated");
 
     }
+    this.update();
     
   }
 
@@ -147,6 +149,8 @@ export default class Home extends Component {
       alert("item buy");
     }
 
+    this.update();
+
   }
 
   async buyCoins(amount){
@@ -199,7 +203,7 @@ export default class Home extends Component {
 
     }
 
-    
+    this.update();
 
     
   }
@@ -384,6 +388,12 @@ export default class Home extends Component {
               <span>
                 Current balance: {this.state.balance}
               </span>
+              <button
+                className="btn btn-primary"
+                onClick={() => this.update()}
+              >
+                Refresh
+              </button>
               <hr />
             </div>
 
