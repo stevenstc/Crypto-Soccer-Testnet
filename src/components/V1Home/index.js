@@ -167,8 +167,11 @@ export default class Home extends Component {
     balance = balance.shiftedBy(-18);
     balance = balance.decimalPlaces(2).toNumber();
 
+    var compra;
+    if(amount === 100)compra = "100000000000000000000";
+    if(amount === 500)compra = "500000000000000000000";
+    if(amount === 1000)compra = "1000000000000000000000";
     amount = new BigNumber(amount);
-    var compra = amount.shiftedBy(18);
 
     amount = amount.decimalPlaces(2).toNumber();
 
