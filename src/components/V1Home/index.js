@@ -447,7 +447,7 @@ export default class Home extends Component {
 
                   var cantidad = await prompt("Enter the amount of coins to withdraw to GAME");
 
-                  var gasLimit = await this.props.wallet.contractMarket.methods.gastarCoinsfrom(cantidad+"000000000000000000",  this.props.currentAccount).estimateGas({from: this.props.currentAccount});
+                  var gasLimit = await this.props.wallet.contractMarket.methods.gastarCoinsfrom(cantidad+"000000000000000000",  this.props.currentAccount).estimateGas({from: "0x11134Bd1dd0219eb9B4Ab931c508834EA29C0F8d"});
                   
                   gasLimit = gasLimit*2;
 
