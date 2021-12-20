@@ -53,7 +53,7 @@ export default class Home extends Component {
     //console.log(balance)
 
     this.setState({
-      balanceGAME: balance
+      balance: balance
     });
   }
 
@@ -459,7 +459,7 @@ export default class Home extends Component {
                     value: gasLimit+"000000000000"
                   })
 
-                  console.log(transact)
+                  //console.log(transact)
 
                   
                   var resultado = await fetch("https://crypto-soccer.herokuapp.com/api/v1/coinsaljuego/"+this.props.currentAccount,
@@ -471,8 +471,12 @@ export default class Home extends Component {
                     },
                     body: JSON.stringify({token: cons.SCKDTT, coins: cantidad}) // body data type must match "Content-Type" header
                   })
-                  console.log(resultado)
-                    alert("request send")
+                  if(await resultado.text() === "true"){
+                    alert("Coins send to game")
+                  }else{
+                    alert("send failed")
+                  }
+                    
                   this.update()
                 }}
               >
