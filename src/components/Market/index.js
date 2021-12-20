@@ -163,49 +163,52 @@ export default class Market extends Component {
   async buyCoins(amount){
 
     var aprovado = await this.props.wallet.contractToken.methods
-      .allowance(this.props.currentAccount, this.props.wallet.contractMarket._address)
-      .call({ from: this.props.currentAccount });
-
-    aprovado = new BigNumber(aprovado);
-    aprovado = aprovado.shiftedBy(-18);
-    aprovado = aprovado.decimalPlaces(2).toNumber();
-
-    var balance = await this.props.wallet.contractToken.methods
-    .balanceOf(this.props.currentAccount)
+    .allowance(this.props.currentAccount, this.props.wallet.contractMarket._address)
     .call({ from: this.props.currentAccount });
 
-    balance = new BigNumber(balance);
-    balance = balance.shiftedBy(-18);
-    balance = balance.decimalPlaces(2).toNumber();
+  aprovado = new BigNumber(aprovado);
+  aprovado = aprovado.shiftedBy(-18);
+  aprovado = aprovado.decimalPlaces(2).toNumber();
 
-    amount = new BigNumber(amount);
-    var compra = amount.shiftedBy(18);
+  var balance = await this.props.wallet.contractToken.methods
+  .balanceOf(this.props.currentAccount)
+  .call({ from: this.props.currentAccount });
 
-    amount = amount.decimalPlaces(2).toNumber();
+  balance = new BigNumber(balance);
+  balance = balance.shiftedBy(-18);
+  balance = balance.decimalPlaces(2).toNumber();
 
-    if(aprovado > 0){
+  var compra;
+  if(amount === 100)compra = "100000000000000000000";
+  if(amount === 500)compra = "500000000000000000000";
+  if(amount === 1000)compra = "1000000000000000000000";
+  amount = new BigNumber(amount);
 
-      if (balance>=amount) {
+  amount = amount.decimalPlaces(2).toNumber();
 
-        var result = await this.props.wallet.contractMarket.methods
-        .buyCoins(compra)
-        .send({ from: this.props.currentAccount });
-  
-        if(result){
-          alert("coins buyed");
-        }
-        
-      }else{
-        alert("insuficient founds")
-      }
+  if(aprovado > 0){
 
-    }else{
-      alert("insuficient aproved balance")
-      await this.props.wallet.contractToken.methods
-      .approve(this.props.wallet.contractMarket._address, "115792089237316195423570985008687907853269984665640564039457584007913129639935")
+    if (balance>=amount) {
+
+      var result = await this.props.wallet.contractMarket.methods
+      .buyCoins(compra)
       .send({ from: this.props.currentAccount });
 
+      if(result){
+        alert("coins buyed");
+      }
+      
+    }else{
+      alert("insuficient founds")
     }
+
+  }else{
+    alert("insuficient aproved balance")
+    await this.props.wallet.contractToken.methods
+    .approve(this.props.wallet.contractMarket._address, "115792089237316195423570985008687907853269984665640564039457584007913129639935")
+    .send({ from: this.props.currentAccount });
+
+  }
 
     this.update();
 
@@ -321,78 +324,6 @@ export default class Market extends Component {
         </div>
       </div>
     </header>
-
-        <header className="masthead text-center text-white">
-          <div className="masthead-content">
-            <div className="container px-5">
-              <div className="row">
-                <div className="col-lg-12 col-md-12 p-4 text-center">
-                  <h2 className=" pb-4">Coin Packs</h2>
-                </div>
-
-                <div className="col-lg-4 col-md-12 p-4 text-center monedas">
-                  <h2 className=" pb-4">BASIC</h2>
-                  <img
-                    className=" pb-4"
-                    src="assets/img/01.png"
-                    width="100%"
-                    alt=""
-                  />
-                  <div
-                    className="position-relative btn-monedas"
-                    onClick={() => this.buyCoins(100)}
-                  >
-                    <span className="position-absolute top-50 end-0 translate-middle-y p-5">
-                      100
-                    </span>
-                  </div>
-                </div>
-
-                <div 
-                  className="col-lg-4 col-md-12 p-4 monedas"
-                  onClick={() => this.buyCoins(500)}
-                
-                >
-                  
-                  <h2 className=" pb-4">PREMIUM</h2>
-                  <img
-                    className=" pb-4"
-                    src="assets/img/02.png"
-                    width="100%"
-                    alt=""
-                  />
-                  <div
-                    className="position-relative btn-monedas"
-                  >
-                    <span className="position-absolute top-50 end-0 translate-middle-y p-5">
-                      500
-                    </span>
-                  </div>
-                </div>
-
-                <div 
-                  className="col-lg-4 col-md-12 p-4 monedas"
-                  onClick={() => this.buyCoins(1000)}
-                >
-                  <h2 className=" pb-4">GOLD</h2>
-                  <img
-                    className=" pb-4"
-                    src="assets/img/03.png"
-                    width="100%"
-                    alt=""
-                  />
-                  <div
-                    className="position-relative btn-monedas"
-                  >
-                    <span className="position-absolute top-50 end-0 translate-middle-y p-5">
-                      1000
-                    </span>
-                  </div>
-                </div>
-              </div>
-            </div>
-          </div>
-        </header>
 
         <div className="container mt-3 mb-3">
           <div className="row text-center">
