@@ -12,7 +12,8 @@ export default class Home extends Component {
     this.state = {
       inventario: [],
       itemsYoutube: [],
-      balance: "Loading..."
+      balance: "Loading...",
+      balanceGAME: "Loading..."
     }
 
     this.balance = this.balance.bind(this);
@@ -125,12 +126,10 @@ export default class Home extends Component {
   async balanceInGame() {
     var balance = await fetch("https://crypto-soccer.herokuapp.com/api/v1/coins/"+this.props.currentAccount)
 
-
-
-    console.log(balance.text)
+    balance = await balance.text();
 
     this.setState({
-      balance: balance
+      balanceGAME: balance
     });
   }
 
