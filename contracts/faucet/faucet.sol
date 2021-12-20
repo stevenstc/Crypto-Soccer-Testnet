@@ -50,7 +50,7 @@ library SafeMath {
 
 }
 
-interface TRC20_Interface {
+interface TRC20_Interface{
 
     function allowance(address _owner, address _spender) external view returns (uint remaining);
 
@@ -69,11 +69,11 @@ contract Ownable is Context {
   event OwnershipTransferred(address indexed previousOwner, address indexed newOwner);
 
   constructor(){
-    owner = payable(_msgSender());
+    owner = payable(msg.sender);
   }
 
   modifier onlyOwner() {
-    if(_msgSender() != owner)revert();
+    if(msg.sender != owner)revert();
     _;
   }
 
@@ -85,7 +85,7 @@ contract Ownable is Context {
 
 }
 
-contract Admin is Context, Ownable{
+contract Admin is Ownable{
   mapping (address => bool) public admin;
 
 
@@ -95,11 +95,11 @@ contract Admin is Context, Ownable{
 
 
   constructor(){
-    admin[_msgSender()] = true;
+    admin[msg.sender] = true;
   }
 
   modifier onlyAdmin() {
-    require(admin[_msgSender()]);
+    require(admin[msg.sender]);
     _;
   }
 
@@ -121,7 +121,7 @@ contract Admin is Context, Ownable{
 contract Faucet is Context, Admin{
   using SafeMath for uint256;
   
-  address public token = 0xF0fB4a5ACf1B1126A991ee189408b112028D7A63;
+  address public token = 0x038987095f309d3640F51644430dc6C7C4E2E409;
 
   TRC20_Interface CSC_Contract = TRC20_Interface(token);
   TRC20_Interface OTRO_Contract = TRC20_Interface(token);
@@ -171,7 +171,7 @@ contract Faucet is Context, Admin{
 
   function ChangePrincipalToken(address _tokenERC20) public onlyOwner returns (bool){
 
-    OTRO_Contract = TRC20_Interface(_tokenERC20);
+    CSC_Contract = TRC20_Interface(_tokenERC20);
     token = _tokenERC20;
 
     return true;

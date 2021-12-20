@@ -362,8 +362,6 @@ export default class Market extends Component {
                 alt="markert info"/>
 
             <h3>MARKET</h3>
-              {this.props.currentAccount}
-              <br />
               <span>
                 Current balance: {this.state.balanceMarket}
               </span>
@@ -373,7 +371,7 @@ export default class Market extends Component {
                 onClick={() => console.log("retira a la wallet")}
               >
                 {"<- "}
-                Send Wallet
+                Send To Wallet
               </button>
               {"    "}
               <button
@@ -381,7 +379,7 @@ export default class Market extends Component {
                 onClick={() => console.log("envia al juego")}
               >
                 {" "}
-                Send Game {" ->"}
+                Send To Game {" ->"}
               </button>
               <hr />
             </div>

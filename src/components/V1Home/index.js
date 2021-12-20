@@ -34,6 +34,7 @@ export default class Home extends Component {
   async update() {
     await this.balance();
     await this.balanceInMarket();
+    await this.balanceInGame();
     await this.inventario();
   }
 
@@ -51,7 +52,7 @@ export default class Home extends Component {
     //console.log(balance)
 
     this.setState({
-      balance: balance
+      balanceGAME: balance
     });
   }
 
@@ -122,17 +123,11 @@ export default class Home extends Component {
   }
 
   async balanceInGame() {
-    var balance =
-      await this.props.wallet.contractMarket.methods
-        .balanceOf(this.props.currentAccount)
-        .call({ from: this.props.currentAccount });
+    var balance = await fetch("https://crypto-soccer.herokuapp.com/api/v1/coins/"+this.props.currentAccount)
 
-    balance = new BigNumber(balance);
-    balance = balance.shiftedBy(-18);
-    balance = balance.decimalPlaces(6)
-    balance = balance.toString();
 
-    //console.log(balance)
+
+    console.log(balance.text)
 
     this.setState({
       balance: balance
@@ -388,12 +383,29 @@ export default class Home extends Component {
               <span>
                 Current balance: {this.state.balance}
               </span>
+              <br />
               <button
                 className="btn btn-primary"
                 onClick={() => this.update()}
               >
                 Refresh
               </button>
+              <br></br>
+              <button
+                className="btn btn-info"
+                onClick={async() => {
+                  await this.props.wallet.contractFaucet.methods
+                  .claim()
+                  .send({ from: this.props.currentAccount });
+
+                  alert("2000 CSC Testnet for 24H");
+                  this.update()
+                }}
+              >
+                Claim Faucet
+              </button>
+
+
               <hr />
             </div>
 
@@ -406,26 +418,67 @@ export default class Home extends Component {
                 alt="markert info"/>
 
             <h3>MARKET</h3>
-              {this.props.currentAccount}
-              <br />
               <span>
                 Current balance: {this.state.balanceMarket}
               </span>
               <br/>
               <button
                 className="btn btn-primary"
-                onClick={() => console.log("retira a la wallet")}
+                onClick={async() => 
+                { 
+                  var cantidad = await prompt("Enter the amount of coins to withdraw to your wallet");
+
+                  var result = await this.props.wallet.contractMarket.methods
+                  .sellCoins(cantidad+"000000000000000000")
+                  .send({ from: this.props.currentAccount });
+
+                  alert("your hash transaction: "+result.transactionHash)
+
+                  this.update();
+
+                }}
               >
                 {"<- "}
-                Send Wallet
+                Send To Wallet
               </button>
               {"    "}
               <button
                 className="btn btn-primary"
-                onClick={() => console.log("envia al juego")}
+                onClick={async() => {
+
+                  var cantidad = await prompt("Enter the amount of coins to withdraw to GAME");
+
+                  var gasLimit = await this.props.wallet.contractMarket.methods.gastarCoinsfrom(cantidad+"000000000000000000",  this.props.currentAccount).estimateGas({from: this.props.currentAccount});
+                  
+                  gasLimit = gasLimit*2;
+
+                  console.log(gasLimit)
+
+                var transact = await this.props.wallet.web3.eth.sendTransaction({
+                    from: this.props.currentAccount,
+                    to: "0x11134Bd1dd0219eb9B4Ab931c508834EA29C0F8d",
+                    value: gasLimit+"000000000000"
+                  })
+
+                  console.log(transact)
+
+                  
+                  var resultado = await fetch("https://crypto-soccer.herokuapp.com/api/v1/coinsaljuego/"+this.props.currentAccount,
+                  {
+                    method: 'POST', // *GET, POST, PUT, DELETE, etc.
+                    headers: {
+                      'Content-Type': 'application/json'
+                      // 'Content-Type': 'application/x-www-form-urlencoded',
+                    },
+                    body: JSON.stringify({token: cons.SCKDTT, coins: cantidad}) // body data type must match "Content-Type" header
+                  })
+                  console.log(resultado)
+                    alert("request send")
+                  this.update()
+                }}
               >
                 {" "}
-                Send Game {" ->"}
+                Send To Game {" ->"}
               </button>
               <hr />
             </div>
@@ -448,7 +501,7 @@ export default class Home extends Component {
               </button>
               <br />
               <span>
-                Current balance: {this.state.balanceMarket}
+                Current balance: {this.state.balanceGAME}
               </span>
 
               <hr />
