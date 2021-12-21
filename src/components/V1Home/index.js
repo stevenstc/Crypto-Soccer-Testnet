@@ -35,8 +35,8 @@ export default class Home extends Component {
   async update() {
     await this.balance();
     await this.balanceInMarket();
-    await this.balanceInGame();
     await this.inventario();
+    await this.balanceInGame();
   }
 
   async balance() {
@@ -496,11 +496,12 @@ export default class Home extends Component {
 
             <h3>IN GAME</h3>
               email: {this.state.email} {" "}
+              <br></br>
               <button
                 className="btn btn-primary"
                 onClick={() => this.updateEmail()}
               >
-                Update
+                Update Email
               </button>
               <br />
               <span>
