@@ -148,13 +148,42 @@ export default class Market extends Component {
 
   async buyItem(id){
 
-    var result = await this.props.wallet.contractMarket.methods
-      .buyItem(id)
-      .send({ from: this.props.currentAccount });
+    console.log("ento a comprar un bendito item")
 
-    if(result){
-      alert("item buy");
-    }
+    var aprovado = await this.props.wallet.contractToken.methods
+      .allowance(this.props.currentAccount, this.props.wallet.contractMarket._address)
+      .call({ from: this.props.currentAccount });
+
+    aprovado = new BigNumber(aprovado);
+    aprovado = aprovado.shiftedBy(-18);
+    aprovado = aprovado.decimalPlaces(2).toNumber();
+
+    var balance = await this.props.wallet.contractToken.methods
+    .balanceOf(this.props.currentAccount)
+    .call({ from: this.props.currentAccount });
+
+    balance = new BigNumber(balance);
+    balance = balance.shiftedBy(-18);
+    balance = balance.decimalPlaces(0).toNumber();
+
+    console.log(aprovado);
+
+    if(aprovado > 0){
+
+        var result = await this.props.wallet.contractMarket.methods
+          .buyItem(id)
+          .send({ from: this.props.currentAccount });
+
+        if(result){
+          alert("item buy");
+        }
+    }else{
+        alert("insuficient aproved balance")
+      await this.props.wallet.contractToken.methods
+      .approve(this.props.wallet.contractMarket._address, "115792089237316195423570985008687907853269984665640564039457584007913129639935")
+      .send({ from: this.props.currentAccount });
+      }
+
 
     this.update();
 

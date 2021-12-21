@@ -20,8 +20,6 @@ export default class Home extends Component {
     this.balanceInMarket = this.balanceInMarket.bind(this);
     this.balanceInGame = this.balanceInGame.bind(this);
     this.inventario = this.inventario.bind(this);
-    this.items = this.items.bind(this);
-    this.buyItem = this.buyItem.bind(this);
     this.updateEmail = this.updateEmail.bind(this);
     this.update = this.update.bind(this);
   }
@@ -133,20 +131,6 @@ export default class Home extends Component {
     });
   }
 
-  async buyItem(id){
-
-    var result = await this.props.wallet.contractMarket.methods
-      .buyItem(id)
-      .send({ from: this.props.currentAccount });
-
-    if(result){
-      alert("item buy");
-    }
-
-    this.update();
-
-  }
-
   async buyCoins(amount){
 
     var aprovado = await this.props.wallet.contractToken.methods
@@ -202,65 +186,7 @@ export default class Home extends Component {
     
   }
 
-  async items() {
-    var itemsYoutube = [];
-
-    var result = await this.props.wallet.contractMarket.methods.largoItems().call({ from: this.props.currentAccount });
-      //console.log(result)
-      //{filter:"grayscale(100%)"}
-
-    var eliminated = [
-      {filter:"grayscale(100%)"},{filter:"grayscale(100%)"},{filter:"grayscale(100%)"},
-      {filter:"grayscale(100%)"},{filter:"grayscale(100%)"},{filter:"grayscale(100%)"},
-      {filter:"grayscale(100%)"},{filter:"grayscale(100%)"},{filter:"grayscale(100%)"},
-      {filter:"grayscale(100%)"}
-
-    ];
-
-    for (let index = 0; index < result; index++) {
-      var item = await this.props.wallet.contractMarket.methods.items(index).call({ from: this.props.currentAccount });
-      itemsYoutube[index] = (
-          <div className="col-md-3 p-3 mb-5 text-center monedas position-relative" key={`items-${index}`}>
-            <h2 className=" pb-2">{item.tipo} #{index+1}</h2>
-            <img
-              className=" pb-2"
-              src={"assets/img/" + item.nombre + ".png"}
-              style={eliminated[index]} 
-              width="100%"
-              alt={item.nombre}
-            />
-
-            <h2 className="centradoFan">
-              <b></b>
-            </h2>
-            
-            <div
-              className="position-relative btn-monedas"
-              onClick={() => {
-                if(eliminated[index]){}else{
-                  this.buyItem(index);
-                }
-                
-              }}
-            >
-              <span className="position-absolute top-50 end-0 translate-middle-y p-5" key="vdaj62">
-                {item.valor/10**18}
-              </span>
-            </div>
-          </div>
-      );
-
-    }
-
-    //console.log(itemsYoutube);
-
-    this.setState({
-      itemsYoutube: itemsYoutube,
-    });
-
-    
-  }
-
+ 
 
   async inventario() {
 
