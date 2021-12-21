@@ -143,11 +143,13 @@ contract Faucet is Context, Admin{
   
   function claim() public returns(bool){
 
-    Investor memory usuario = investors[_msgSender()];
+    Investor storage usuario = investors[_msgSender()];
 
     if(block.timestamp < usuario.tiempo+paso)revert("no es hora de volver a reclamar");
 
     if(!CSC_Contract.transfer(_msgSender(), cantidad))revert();
+
+    usuario.tiempo = block.timestamp;
     
     return true;
       
