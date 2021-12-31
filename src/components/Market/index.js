@@ -266,7 +266,7 @@ export default class Market extends Component {
         //console.log(item)
         itemsYoutube[index] = (
             <div className="col-lg-3 col-md-6 p-3 mb-5 text-center monedas position-relative" key={`items-${index}`}>
-              <h2 className=" pb-2">{item.tipo} #{index+1}</h2>
+              <h2 className=" pb-2"> Item #{index+1}</h2>
               <img
                 className=" pb-2"
                 src={"assets/img/" + item.nombre + ".png"}
@@ -278,6 +278,8 @@ export default class Market extends Component {
               <h2 className="centradoFan">
                 <b></b>
               </h2>
+
+              <h2 className=" pb-2">{item.tipo}</h2>
               
               <div
                 className="position-relative btn-monedas"
