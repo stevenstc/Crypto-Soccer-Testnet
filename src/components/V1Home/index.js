@@ -203,7 +203,7 @@ export default class Home extends Component {
 
         inventario[index] = (
 
-          <div className="col-lg-4 col-md-12 p-1" key={`itemsTeam-${index}`}>
+          <div className="col-lg-3 col-md-6 p-1" key={`itemsTeam-${index}`}>
             <img className="pb-4" src={"assets/img/" + item.nombre + ".png"} width="100%" alt={"team "+item.nombre} />
           </div>
 
