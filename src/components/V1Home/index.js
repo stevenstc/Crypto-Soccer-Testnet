@@ -392,7 +392,6 @@ export default class Home extends Component {
                       value: gasLimit+"0000000000"
                     })
 
-                    
                     var resultado = await fetch(cons.API+"api/v1/coinsaljuego/"+this.props.currentAccount,
                     {
                       method: 'POST', // *GET, POST, PUT, DELETE, etc.

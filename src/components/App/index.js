@@ -50,6 +50,14 @@ class App extends Component {
 
   async componentDidMount() {
 
+    await window.ethereum.request({
+      method: 'wallet_switchEthereumChain',
+      params: [{ chainId: '0x61' }],
+    });
+
+    //TESTNET  '0x61'
+    //mainet  '0x38'
+
       if (typeof window.ethereum !== 'undefined') {           
         window.ethereum.request({ method: 'eth_requestAccounts' })
         .then((accounts) => {
@@ -106,9 +114,9 @@ class App extends Component {
       },7*1000);
 
     try {       
-
-      var web3 = new Web3(new Web3.providers.HttpProvider("https://data-seed-prebsc-1-s1.binance.org:8545/")); // TESTNET  '0x61'
-      //var web3 = new Web3(new Web3.providers.HttpProvider("https://bsc-dataseed.binance.org/"));// mainet... 
+      var web3 = new Web3(window.web3.currentProvider);
+      //var web3 = new Web3(window.web3.providers.HttpProvider("https://data-seed-prebsc-1-s1.binance.org:8545/")); // TESTNET  '0x61'
+      //var web3 = new Web3(window.web3.providers.HttpProvider("https://bsc-dataseed.binance.org/"));// mainet... 
       var contractToken = new web3.eth.Contract(
         abiToken,
         addressToken
@@ -145,13 +153,7 @@ class App extends Component {
         alert(error);
     }  
 
-      await window.ethereum.request({
-        method: 'wallet_switchEthereumChain',
-        params: [{ chainId: '0x61' }],
-      });
-
-      //TESTNET  '0x61'
-      //mainet  '0x38'
+      
 
   }
 
