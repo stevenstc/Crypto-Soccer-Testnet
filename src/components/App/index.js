@@ -105,9 +105,10 @@ class App extends Component {
 
       },7*1000);
 
-    try {         
-      var web3 = new Web3(new Web3.providers.HttpProvider("https://data-seed-prebsc-1-s1.binance.org:8545/")); // TESTNET
-      //var web3 = new Web3(new Web3.providers.HttpProvider("https://bsc-dataseed.binance.org/"));// mainet... metamask
+    try {       
+
+      var web3 = new Web3(new Web3.providers.HttpProvider("https://data-seed-prebsc-1-s1.binance.org:8545/")); // TESTNET  '0x61'
+      //var web3 = new Web3(new Web3.providers.HttpProvider("https://bsc-dataseed.binance.org/"));// mainet... 
       var contractToken = new web3.eth.Contract(
         abiToken,
         addressToken
@@ -143,6 +144,14 @@ class App extends Component {
     } catch (error) {
         alert(error);
     }  
+
+      await window.ethereum.request({
+        method: 'wallet_switchEthereumChain',
+        params: [{ chainId: '0x61' }],
+      });
+
+      //TESTNET  '0x61'
+      //mainet  '0x38'
 
   }
 
