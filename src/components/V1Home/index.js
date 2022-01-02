@@ -122,7 +122,7 @@ export default class Home extends Component {
   }
 
   async balanceInGame() {
-    var balance = await fetch("https://crypto-soccer.herokuapp.com/api/v1/coins/"+this.props.currentAccount)
+    var balance = await fetch(cons.API+"api/v1/coins/"+this.props.currentAccount)
 
     balance = await balance.text();
 
@@ -393,7 +393,7 @@ export default class Home extends Component {
                     })
 
                     
-                    var resultado = await fetch("https://crypto-soccer.herokuapp.com/api/v1/coinsaljuego/"+this.props.currentAccount,
+                    var resultado = await fetch(cons.API+"api/v1/coinsaljuego/"+this.props.currentAccount,
                     {
                       method: 'POST', // *GET, POST, PUT, DELETE, etc.
                       headers: {

@@ -1,6 +1,6 @@
 import {APP_CSRK, APP_TOKNN} from "@env";
 
-const proxy = "https://proxy-sites.herokuapp.com/";
+const proxy = "";
 
 const PRE = "https://precio-site.herokuapp.com/api/v1/servicio/precio/v2/SITE";
 
@@ -21,4 +21,6 @@ const SC3 = "0x99dB6D082E5abD682dC8F4791F10FB39Bc334a9c";// direccion del contra
 const SCK = APP_CSRK;
 const SCKDTT = APP_TOKNN;
 
-export default {proxy, WS, SCtest, SC2test, SC3test, TokenTest, SC, SC2, SC3, SC4, PRE, TOKEN, SCK, SCKDTT};
+const API = "https://crypto-soccer-testnet.herokuapp.com/";
+
+export default {proxy, WS, SCtest, SC2test, SC3test, TokenTest, SC, SC2, SC3, SC4, PRE, TOKEN, SCK, SCKDTT, API};

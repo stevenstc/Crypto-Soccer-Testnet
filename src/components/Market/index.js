@@ -158,6 +158,8 @@ export default class Market extends Component {
     aprovado = aprovado.shiftedBy(-18);
     aprovado = aprovado.decimalPlaces(2).toNumber();
 
+    /*
+
     var balance = await this.props.wallet.contractToken.methods
     .balanceOf(this.props.currentAccount)
     .call({ from: this.props.currentAccount });
@@ -165,6 +167,7 @@ export default class Market extends Component {
     balance = new BigNumber(balance);
     balance = balance.shiftedBy(-18);
     balance = balance.decimalPlaces(0).toNumber();
+    */
 
     console.log(aprovado);
 
@@ -250,6 +253,7 @@ export default class Market extends Component {
       });
 
       var itemsYoutube = [];
+      var listItems = [];
 
       var result = await this.props.wallet.contractMarket.methods.largoItems().call({ from: this.props.currentAccount });
         //console.log(result)
@@ -263,6 +267,7 @@ export default class Market extends Component {
         }else{
           eliminated = {filter:"grayscale(100%)"};
         }
+        listItems[index]= item;
         //console.log(item)
         itemsYoutube[index] = (
             <div className="col-lg-3 col-md-6 p-3 mb-5 text-center monedas position-relative" key={`items-${index}`}>
@@ -284,7 +289,7 @@ export default class Market extends Component {
               <div
                 className="position-relative btn-monedas"
                 onClick={() => {
-                  if(item.ilimitado || parseInt(item.cantidad) > 0){
+                  if(listItems[index].ilimitado || parseInt(listItems[index].cantidad) > 0){
                     this.buyItem(index);
                   }else{
                     alert("Sold Out")
@@ -344,6 +349,13 @@ export default class Market extends Component {
       <><header className="masthead text-center text-white">
       <div className="masthead-content">
         <div className="container px-5">
+        <div className="row">
+            <div className="col-lg-12 col-md-12 p-4 text-center bg-secondary bg-gradient">
+              <h2 className=" pb-4">CSC aviable:</h2><br></br>
+              <h3 className=" pb-4">{this.state.balance}</h3>
+            </div>          
+
+          </div>
           <div className="row">
             <div className="col-lg-12 col-md-12 p-4 text-center">
               <h2 className=" pb-4">Items</h2>
