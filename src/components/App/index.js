@@ -105,9 +105,9 @@ class App extends Component {
 
       },7*1000);
 
-
     try {         
-      var web3 = new Web3(window.web3.currentProvider);// mainet... metamask
+      var web3 = new Web3(new Web3.providers.HttpProvider("https://data-seed-prebsc-1-s1.binance.org:8545/")); // TESTNET
+      //var web3 = new Web3(new Web3.providers.HttpProvider("https://bsc-dataseed.binance.org/"));// mainet... metamask
       var contractToken = new web3.eth.Contract(
         abiToken,
         addressToken
@@ -139,7 +139,7 @@ class App extends Component {
           contractFaucet: contractFaucet
         }
       })
-      //web3 = new Web3(new Web3.providers.HttpProvider("https://data-seed-prebsc-1-s1.binance.org:8545/"));
+      
     } catch (error) {
         alert(error);
     }  
