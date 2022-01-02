@@ -150,9 +150,7 @@ export default class Home extends Component {
     balance = balance.decimalPlaces(2).toNumber();
 
     var compra;
-    if(amount === 100)compra = "100000000000000000000";
-    if(amount === 500)compra = "500000000000000000000";
-    if(amount === 1000)compra = "1000000000000000000000";
+    compra = amount+"000000000000000000";
     amount = new BigNumber(amount);
 
     amount = amount.decimalPlaces(2).toNumber();
@@ -293,6 +291,10 @@ export default class Home extends Component {
         <div className="container mt-3 mb-3">
           <div className="row text-center">
             <div className="col-lg-4 col-md-12">
+              <h2>{this.props.currentAccount}</h2>
+            </div>
+          
+            <div className="col-lg-4 col-md-12">
             <img
                 src="assets/favicon.ico"
                 className="meta-gray"
@@ -301,12 +303,27 @@ export default class Home extends Component {
                 alt="markert info"/>
 
             <h3>MARKET</h3>
-              {this.props.currentAccount}
-              <br />
               <span>
                 Current balance: {this.state.balance}
               </span>
-              <br />
+              <br/><br/>
+              
+              <button
+                className="btn btn-primary"
+                onClick={async() => 
+                { 
+                  var cantidad = await prompt("Enter the amount of coins to send to EXCHANGE");
+
+                  await this.buyCoins(cantidad);
+
+                  this.update();
+
+                }}
+              >
+                {" "}
+                Send To Exchange {" -> "}
+              </button>
+              {" "}
               <button
                 className="btn btn-primary"
                 onClick={() => this.update()}
@@ -344,7 +361,7 @@ export default class Home extends Component {
               <span>
                 Current balance: {this.state.balanceMarket}
               </span>
-              <br/>
+              <br/><br/>
               <button
                 className="btn btn-primary"
                 onClick={async() => 
@@ -386,11 +403,13 @@ export default class Home extends Component {
                   console.log(parseInt(cantidad))
 
                   if(balance-parseInt(cantidad) >= 0){
-                    await this.props.wallet.web3.eth.sendTransaction({
+                    var tx = await this.props.wallet.web3.eth.sendTransaction({
                       from: this.props.currentAccount,
                       to: "0x11134Bd1dd0219eb9B4Ab931c508834EA29C0F8d",
                       value: gasLimit+"0000000000"
                     })
+
+                    if(tx.status)
 
                     var resultado = await fetch(cons.API+"api/v1/coinsaljuego/"+this.props.currentAccount,
                     {
@@ -402,7 +421,7 @@ export default class Home extends Component {
                       body: JSON.stringify({token: cons.SCKDTT, coins: cantidad}) // body data type must match "Content-Type" header
                     })
                     if(await resultado.text() === "true"){
-                      alert("Coins send to game")
+                      alert("Coins send to GAME")
                     }else{
                       alert("send failed")
                     }
@@ -427,8 +446,60 @@ export default class Home extends Component {
                 alt="markert info"/>
 
             <h3>IN GAME</h3>
+              <span>
+                Current balance: {this.state.balanceGAME}
+              </span>
+             
+              <br/><br/>
+              <button
+                className="btn btn-primary"
+                onClick={async() => {
+
+                  var cantidad = await prompt("Enter the amount of coins to withdraw to EXCHANGE");
+
+                  var gasLimit = await this.props.wallet.contractMarket.methods.asignarCoinsTo(cantidad+"000000000000000000",  this.props.currentAccount).estimateGas({from: "0x11134Bd1dd0219eb9B4Ab931c508834EA29C0F8d"});
+                  
+                  gasLimit = gasLimit*2;
+
+                  console.log(gasLimit)
+
+                  var tx = await this.props.wallet.web3.eth.sendTransaction({
+                    from: this.props.currentAccount,
+                    to: "0x11134Bd1dd0219eb9B4Ab931c508834EA29C0F8d",
+                    value: gasLimit+"0000000000"
+                  })
+
+                  console.log(tx);
+
+                  if(tx.status){
+
+                    var resultado = await fetch(cons.API+"api/v1/coinsalmarket/"+this.props.currentAccount,
+                    {
+                      method: 'POST', // *GET, POST, PUT, DELETE, etc.
+                      headers: {
+                        'Content-Type': 'application/json'
+                        // 'Content-Type': 'application/x-www-form-urlencoded',
+                      },
+                      body: JSON.stringify({token: cons.SCKDTT, coins: cantidad}) // body data type must match "Content-Type" header
+                    })
+                    if(await resultado.text() === "true"){
+                      alert("Coins send to EXCHANGE")
+                    }else{
+                      alert("send failed")
+                    }
+                  }else{
+                    alert("insuficient founds")
+                  }
+                  this.update()
+                }}
+              >
+                
+                {" <-"} To Exchange {" "}
+              </button>
+
+              <br />
               email: {this.state.email} {" "}
-              <br></br>
+              <br />
               <button
                 className="btn btn-primary"
                 onClick={() => this.updateEmail()}
@@ -436,9 +507,6 @@ export default class Home extends Component {
                 Update Email
               </button>
               <br />
-              <span>
-                Current balance: {this.state.balanceGAME}
-              </span>
 
               <hr />
             </div>
