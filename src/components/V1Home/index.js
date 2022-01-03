@@ -219,6 +219,7 @@ export default class Home extends Component {
         <header className="masthead text-center text-white">
           <div className="masthead-content">
             <div className="container px-5">
+              
               <div className="row">
                 <div className="col-lg-12 col-md-12 p-4 text-center">
                   <h2 className=" pb-4">Coin Packs</h2>
@@ -290,9 +291,12 @@ export default class Home extends Component {
 
         <div className="container mt-3 mb-3">
           <div className="row text-center">
-            <div className="col-lg-4 col-md-12">
-              <h2>{this.props.currentAccount}</h2>
+            <div className="col-lg-12 col-md-12 text-center">
+              <h2>Wallet conected</h2>
+              <p>{this.props.currentAccount}</p>
+              <hr></hr>
             </div>
+
           
             <div className="col-lg-4 col-md-12">
             <img
@@ -345,8 +349,6 @@ export default class Home extends Component {
                 Claim Faucet
               </button>
 
-
-              <hr />
             </div>
 
             <div className="col-lg-4 col-md-12">
@@ -434,7 +436,6 @@ export default class Home extends Component {
                 {" "}
                 Send To Game {" ->"}
               </button>
-              <hr />
             </div>
 
             <div className="col-lg-4 col-md-12">
@@ -508,7 +509,10 @@ export default class Home extends Component {
               </button>
               <br />
 
-              <hr />
+            </div>
+
+            <div className="col-lg-12 col-md-12 text-center">
+              <hr></hr>
             </div>
 
           </div>
