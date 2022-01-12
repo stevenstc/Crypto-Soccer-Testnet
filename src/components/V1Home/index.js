@@ -238,7 +238,7 @@ export default class Home extends Component {
                     onClick={() => this.buyCoins(100)}
                   >
                     <span className="position-absolute top-50 end-0 translate-middle-y p-5">
-                      100
+                      100 WCSC
                     </span>
                   </div>
                 </div>
@@ -260,7 +260,7 @@ export default class Home extends Component {
                     className="position-relative btn-monedas"
                   >
                     <span className="position-absolute top-50 end-0 translate-middle-y p-5">
-                      500
+                      500 WCSC
                     </span>
                   </div>
                 </div>
@@ -280,7 +280,7 @@ export default class Home extends Component {
                     className="position-relative btn-monedas"
                   >
                     <span className="position-absolute top-50 end-0 translate-middle-y p-5">
-                      1000
+                      1000 WCSC
                     </span>
                   </div>
                 </div>
@@ -308,7 +308,7 @@ export default class Home extends Component {
 
             <h3>MARKET</h3>
               <span>
-                Current balance: {this.state.balance}
+                CSC: {this.state.balance}
               </span>
               <br/><br/>
               
@@ -325,29 +325,16 @@ export default class Home extends Component {
                 }}
               >
                 {" "}
-                Send To Exchange {" -> "}
+                Exchange to WCSC {" -> "}
               </button>
-              {" "}
+              <br /><br />
               <button
                 className="btn btn-primary"
                 onClick={() => this.update()}
               >
                 Refresh
               </button>
-              <br></br>
-              <button
-                className="btn btn-info"
-                onClick={async() => {
-                  await this.props.wallet.contractFaucet.methods
-                  .claim()
-                  .send({ from: this.props.currentAccount });
-
-                  alert("2000 CSC Testnet for 24H");
-                  this.update()
-                }}
-              >
-                Claim Faucet
-              </button>
+              <br />
 
             </div>
 
@@ -361,7 +348,7 @@ export default class Home extends Component {
 
             <h3>EXCHANGE</h3>
               <span>
-                Current balance: {this.state.balanceMarket}
+                WCSC: {this.state.balanceMarket}
               </span>
               <br/><br/>
               <button
@@ -381,9 +368,9 @@ export default class Home extends Component {
                 }}
               >
                 {"<- "}
-                Send To Wallet
+                Exchange To CSC
               </button>
-              {"    "}
+              <br/><br/>
               <button
                 className="btn btn-primary"
                 onClick={async() => {
@@ -434,7 +421,7 @@ export default class Home extends Component {
                 }}
               >
                 {" "}
-                Send To Game {" ->"}
+                Send WCSC To Game {" ->"}
               </button>
             </div>
 
@@ -448,7 +435,7 @@ export default class Home extends Component {
 
             <h3>IN GAME</h3>
               <span>
-                Current balance: {this.state.balanceGAME}
+                WCSC: {this.state.balanceGAME}
               </span>
              
               <br/><br/>

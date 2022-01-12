@@ -2,7 +2,7 @@ import {APP_CSRK, APP_TOKNN} from "@env";
 
 const proxy = "";
 
-const PRE = "https://precio-site.herokuapp.com/api/v1/servicio/precio/v2/SITE";
+const PRE = "";
 
 const WS = true;//TESTNET
 
