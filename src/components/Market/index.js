@@ -1,9 +1,5 @@
 import React, { Component } from "react";
-import cons from "../../cons"
 const BigNumber = require('bignumber.js');
-const Cryptr = require('cryptr');
-
-const cryptr = new Cryptr(cons.SCK);
 
 export default class Market extends Component {
   constructor(props) {
@@ -21,12 +17,9 @@ export default class Market extends Component {
     }
 
     this.balance = this.balance.bind(this);
-    this.balanceInMarket = this.balanceInMarket.bind(this);
-    this.balanceInGame = this.balanceInGame.bind(this);
     this.inventario = this.inventario.bind(this);
     this.items = this.items.bind(this);
     this.buyItem = this.buyItem.bind(this);
-    this.updateEmail = this.updateEmail.bind(this);
     this.update = this.update.bind(this);
 
   }
@@ -40,7 +33,6 @@ export default class Market extends Component {
   async update() {
 
     await this.balance();
-    await this.balanceInMarket();
     await this.inventario();
     await this.items();
 
@@ -64,87 +56,6 @@ export default class Market extends Component {
     });
   }
 
-  async updateEmail() {
-    var email = "example@gmail.com";
-    email = await window.prompt("enter your email", "example@gmail.com");
-    
-    var investor =
-      await this.props.wallet.contractMarket.methods
-        .investors(this.props.currentAccount)
-        .call({ from: this.props.currentAccount });
-
-    if(window.confirm("is correct?: "+email)){
-      const encryptedString = cryptr.encrypt(email);
-      if (investor.registered) {
-        await this.props.wallet.contractMarket.methods
-          .updateRegistro(encryptedString)
-          .send({ from: this.props.currentAccount });
-      }else{
-        await this.props.wallet.contractMarket.methods
-          .registro(encryptedString)
-          .send({ from: this.props.currentAccount });
-      }
-
-      alert("email Updated");
-
-    }
-
-    this.update();
-    
-  }
-
-  async balanceInMarket() {
-    var investor =
-      await this.props.wallet.contractMarket.methods
-        .investors(this.props.currentAccount)
-        .call({ from: this.props.currentAccount });
-
-        //console.log(investor)
-
-    var balance = investor.balance;
-    var gastado = investor.gastado;
-    var email = investor.correo;
-
-    //console.log(investor);
-
-    if (email === "") {
-      email = "Please update your email";
-    }else{
-      email = cryptr.decrypt(investor.correo);
-    }
-
-    balance = new BigNumber(balance);
-    gastado = new BigNumber(gastado);
-    balance = balance.minus(gastado);
-    balance = balance.shiftedBy(-18);
-    balance = balance.decimalPlaces(6)
-    balance = balance.toString();
-
-    //console.log(balance)
-
-    this.setState({
-      balanceMarket: balance,
-      email: email
-    });
-  }
-
-  async balanceInGame() {
-    var balance =
-      await this.props.wallet.contractMarket.methods
-        .balanceOf(this.props.currentAccount)
-        .call({ from: this.props.currentAccount });
-
-    balance = new BigNumber(balance);
-    balance = balance.shiftedBy(-18);
-    balance = balance.decimalPlaces(6)
-    balance = balance.toString();
-
-    //console.log(balance)
-
-    this.setState({
-      balance: balance
-    });
-  }
 
   async buyItem(id){
 
@@ -351,9 +262,9 @@ export default class Market extends Component {
         <div className="container px-5">
         <div className="row">
             <div className="col-lg-12 col-md-12 p-4 text-center bg-secondary bg-gradient">
-              <h2 className=" pb-4">CSC aviable:</h2><br></br>
+              <h2 className=" pb-4">CSC available:</h2><br></br>
               <h3 className=" pb-4">{this.state.balance}</h3>
-            </div>          
+            </div>
 
           </div>
           <div className="row">

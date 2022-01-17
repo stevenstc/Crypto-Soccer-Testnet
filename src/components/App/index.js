@@ -21,12 +21,15 @@ var addressFan = cons.SC2;
 var addressStaking = cons.SC3;
 var addressFaucet = cons.SC4;
 
+var chainId = '0x38';
+
 if(cons.WS){
   addressToken = cons.TokenTest;
   addressMarket = cons.SCtest;
   addressFan = cons.SC2test;
   addressStaking = cons.SC3test;
   addressFaucet = cons.SC4;
+  chainId = '0x61';
 }
 
 
@@ -52,7 +55,7 @@ class App extends Component {
 
     await window.ethereum.request({
       method: 'wallet_switchEthereumChain',
-      params: [{ chainId: '0x61' }],
+      params: [{ chainId: chainId}],
     });
 
     //TESTNET  '0x61'

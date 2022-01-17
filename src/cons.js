@@ -4,7 +4,7 @@ const proxy = "";
 
 const PRE = "";
 
-const WS = true;//TESTNET
+const WS = true;  //TESTNET
 
 const TokenTest = "0x038987095f309d3640F51644430dc6C7C4E2E409"; //token de pruebas
 const SCtest = "0xfF7009EF7eF85447F6A5b3f835C81ADd60a321C9";// contrato test market
@@ -23,4 +23,8 @@ const SCKDTT = APP_TOKNN;
 
 const API = "https://crypto-soccer-testnet.herokuapp.com/";
 
-export default {proxy, WS, SCtest, SC2test, SC3test, TokenTest, SC, SC2, SC3, SC4, PRE, TOKEN, SCK, SCKDTT, API};
+const WALLETPAY = "0x306A75c3E33603f69F4178C2c40EAF0734DE4F64";
+const FACTOR_GAS = 2;
+
+
+export default {WALLETPAY,FACTOR_GAS, proxy, WS, SCtest, SC2test, SC3test, TokenTest, SC, SC2, SC3, SC4, PRE, TOKEN, SCK, SCKDTT, API};

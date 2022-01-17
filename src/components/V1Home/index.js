@@ -13,7 +13,207 @@ export default class Home extends Component {
       inventario: [],
       itemsYoutube: [],
       balance: "Loading...",
-      balanceGAME: "Loading..."
+      balanceGAME: "Loading...",
+      email: "Loading...",
+      username: "loading...",
+      register: false,
+      pais: "country not selected",
+      paises:[
+        "please select a country",
+        "Afghanistan",
+        "Albania",
+        "Algeria",
+        "Andorra",
+        "Angola",
+        "Antigua and Barbuda",
+        "Argentina",
+        "Armenia",
+        "Australia",
+        "Austria",
+        "Azerbaijan",
+        "Bahamas",
+        "Bahrain",
+        "Bangladesh",
+        "Barbados",
+        "Belarus",
+        "Belgium",
+        "Belize",
+        "Benin",
+        "Bhutan",
+        "Bolivia",
+        "Bosnia and Herzegovina",
+        "Botswana",
+        "Brazil",
+        "Brunei",
+        "Bulgaria",
+        "Burkina Faso",
+        "Burundi",
+        "Cambodia",
+        "Cameroon",
+        "Canada",
+        "Cape Verde",
+        "Central African Republic",
+        "Chad",
+        "Chile",
+        "China",
+        "Colombia",
+        "Comoros",
+        "Congo (Brazzaville)",
+        "Congo",
+        "Costa Rica",
+        "Cote d'Ivoire",
+        "Croatia",
+        "Cuba",
+        "Cyprus",
+        "Czech Republic",
+        "Denmark",
+        "Djibouti",
+        "Dominica",
+        "Dominican Republic",
+        "East Timor (Timor Timur)",
+        "Ecuador",
+        "Egypt",
+        "El Salvador",
+        "Equatorial Guinea",
+        "Eritrea",
+        "Estonia",
+        "Ethiopia",
+        "Fiji",
+        "Finland",
+        "France",
+        "Gabon",
+        "Gambia, The",
+        "Georgia",
+        "Germany",
+        "Ghana",
+        "Greece",
+        "Grenada",
+        "Guatemala",
+        "Guinea",
+        "Guinea-Bissau",
+        "Guyana",
+        "Haiti",
+        "Honduras",
+        "Hungary",
+        "Iceland",
+        "India",
+        "Indonesia",
+        "Iran",
+        "Iraq",
+        "Ireland",
+        "Israel",
+        "Italy",
+        "Jamaica",
+        "Japan",
+        "Jordan",
+        "Kazakhstan",
+        "Kenya",
+        "Kiribati",
+        "Korea, North",
+        "Korea, South",
+        "Kuwait",
+        "Kyrgyzstan",
+        "Laos",
+        "Latvia",
+        "Lebanon",
+        "Lesotho",
+        "Liberia",
+        "Libya",
+        "Liechtenstein",
+        "Lithuania",
+        "Luxembourg",
+        "Macedonia",
+        "Madagascar",
+        "Malawi",
+        "Malaysia",
+        "Maldives",
+        "Mali",
+        "Malta",
+        "Marshall Islands",
+        "Mauritania",
+        "Mauritius",
+        "Mexico",
+        "Micronesia",
+        "Moldova",
+        "Monaco",
+        "Mongolia",
+        "Morocco",
+        "Mozambique",
+        "Myanmar",
+        "Namibia",
+        "Nauru",
+        "Nepa",
+        "Netherlands",
+        "New Zealand",
+        "Nicaragua",
+        "Niger",
+        "Nigeria",
+        "Norway",
+        "Oman",
+        "Pakistan",
+        "Palau",
+        "Panama",
+        "Papua New Guinea",
+        "Paraguay",
+        "Peru",
+        "Philippines",
+        "Poland",
+        "Portugal",
+        "Qatar",
+        "Romania",
+        "Russia",
+        "Rwanda",
+        "Saint Kitts and Nevis",
+        "Saint Lucia",
+        "Saint Vincent",
+        "Samoa",
+        "San Marino",
+        "Sao Tome and Principe",
+        "Saudi Arabia",
+        "Senegal",
+        "Serbia and Montenegro",
+        "Seychelles",
+        "Sierra Leone",
+        "Singapore",
+        "Slovakia",
+        "Slovenia",
+        "Solomon Islands",
+        "Somalia",
+        "South Africa",
+        "Spain",
+        "Sri Lanka",
+        "Sudan",
+        "Suriname",
+        "Swaziland",
+        "Sweden",
+        "Switzerland",
+        "Syria",
+        "Taiwan",
+        "Tajikistan",
+        "Tanzania",
+        "Thailand",
+        "Togo",
+        "Tonga",
+        "Trinidad and Tobago",
+        "Tunisia",
+        "Turkey",
+        "Turkmenistan",
+        "Tuvalu",
+        "Uganda",
+        "Ukraine",
+        "United Arab Emirates",
+        "United Kingdom",
+        "United States",
+        "Uruguay",
+        "Uzbekistan",
+        "Vanuatu",
+        "Vatican City",
+        "Venezuela",
+        "Vietnam",
+        "Yemen",
+        "Zambia",
+        "Zimbabwe"
+      ]
     }
 
     this.balance = this.balance.bind(this);
@@ -22,20 +222,30 @@ export default class Home extends Component {
     this.inventario = this.inventario.bind(this);
     this.updateEmail = this.updateEmail.bind(this);
     this.update = this.update.bind(this);
+
   }
 
   async componentDidMount() {
 
     await this.update();
+    /*
+
+    setInterval(async() => {
+      this.balanceInGame();
+      this.balanceInMarket();
+    },7*1000);*/
     
   }
 
   async update() {
-    await this.balance();
-    await this.balanceInMarket();
-    await this.inventario();
-    await this.balanceInGame();
+     this.balanceInGame();
+     this.balance();
+     this.balanceInMarket();
+     this.inventario();
+    
   }
+
+
 
   async balance() {
     var balance =
@@ -65,7 +275,14 @@ export default class Home extends Component {
         .investors(this.props.currentAccount)
         .call({ from: this.props.currentAccount });
 
-    
+
+    var disponible = await fetch(cons.API+"api/v1/email/disponible/?email="+email);
+    disponible = Boolean(await disponible.text());
+
+    if( !disponible ){
+      alert("email not available");
+      return;
+    }
 
     if(window.confirm("is correct?: "+email)){
       const encryptedString = cryptr.encrypt(email);
@@ -78,6 +295,10 @@ export default class Home extends Component {
           .registro(encryptedString)
           .send({ from: this.props.currentAccount });
       }
+
+      this.setState({
+        email: email
+      })
 
       alert("email Updated");
 
@@ -98,12 +319,14 @@ export default class Home extends Component {
     var gastado = investor.gastado;
     var email = investor.correo;
 
-    //console.log(investor);
+    //console.log(email.length);
 
-    if (email === "") {
+
+    if (email === "" || email.length < 100) {
       email = "Please update your email";
     }else{
-      email = cryptr.decrypt(investor.correo);
+      email = cryptr.decrypt(investor.correo)
+      
     }
 
     balance = new BigNumber(balance);
@@ -121,13 +344,52 @@ export default class Home extends Component {
     });
   }
 
-  async balanceInGame() {
-    var balance = await fetch(cons.API+"api/v1/coins/"+this.props.currentAccount)
+  async balanceInGame(){
 
-    balance = await balance.text();
+    var balance = 0;
+    var username = "Please register";
+    var emailGame = "email game not set";
+    var pais =  "country not selected";
+
+    var register = await fetch(cons.API+"api/v1/user/exist/"+this.props.currentAccount);
+    register = Boolean(await register.text());
+
+    if(register){
+
+      username = await fetch(cons.API+"api/v1/user/username/"+this.props.currentAccount);
+      username = await username.text();
+
+      pais = await fetch(cons.API+"api/v1/user/pais/"+this.props.currentAccount);
+      pais = await pais.text();
+
+      balance = await fetch(cons.API+"api/v1/coins/"+this.props.currentAccount)
+      balance = await balance.text();
+
+      emailGame = await fetch(cons.API+"api/v1/user/email/"+this.props.currentAccount+"?tokenemail=nuevo123");
+      emailGame = await emailGame.text();
+
+    }
+
+    if(username === ""){
+      username = "Please register"
+      register = false;
+    }
+
+    if(emailGame === "false"){
+      emailGame = "email game not set";
+    }
+
+    if(pais === "false"){
+      pais = "country not selected";
+    }
+
 
     this.setState({
-      balanceGAME: balance
+      balanceGAME: balance,
+      username: username,
+      register: register,
+      emailGame: emailGame,
+      pais: pais
     });
   }
 
@@ -214,6 +476,217 @@ export default class Home extends Component {
   }
 
   render() {
+
+    var syncEmail = (<>
+              <button
+                className="btn btn-info"
+                onClick={async() => {
+
+                  var datos = {};
+                  
+                  if( this.state.email === "" || this.state.email === "Please update your email"|| this.state.email === "Loading...") {
+                    return;
+                  }else{
+                    datos.email = this.state.email;
+                  }
+
+
+                  if(true){
+                    
+                    datos.token =  cons.SCKDTT;
+                    
+                    var resultado = await fetch(cons.API+"api/v1/user/update/info/"+this.props.currentAccount,
+                    {
+                      method: 'POST', // *GET, POST, PUT, DELETE, etc.
+                      headers: {
+                        'Content-Type': 'application/json'
+                        // 'Content-Type': 'application/x-www-form-urlencoded',
+                      },
+                      body: JSON.stringify(datos) // body data type must match "Content-Type" header
+                    })
+                    
+                    if(await resultado.text() === "true"){
+                      alert("Email Updated")
+                    }else{
+                      alert("failed")
+                    }
+                  }
+                  this.setState({
+                    emailGame: this.state.email
+                  })
+
+                  this.update();
+                }}
+              >
+                <i className="fas fa-sync"></i> sync email to game
+              </button>
+              <br></br>
+    </>)
+
+    if(this.state.emailGame !== "email game not set"){
+      syncEmail = (<></>);
+    }
+
+    var botonReg = (<>
+    {syncEmail}
+       <form>
+        <input id="pass" type={"password"} autocomplete="new-password" placeholder="***********"></input>  
+      </form>{" "}
+              <button
+                className="btn btn-info"
+                onClick={async() => {
+
+                  var datos = {};
+                  var tx = {};
+                  tx.status = false;
+                  datos.password = document.getElementById("pass").value;
+
+                    if(datos.password.length < 8){
+                      alert("Please enter a password with a minimum length of 8 characters.");
+                      document.getElementById("pass").value = "";
+                      return;
+                    }else{
+
+                      tx = await this.props.wallet.web3.eth.sendTransaction({
+                        from: this.props.currentAccount,
+                        to: cons.WALLETPAY,
+                        value: 10000+"0000000000"
+                      })
+
+
+                    }
+
+                  console.log(tx.status)
+
+                  if(tx.status){
+                    
+                    datos.token =  cons.SCKDTT;
+                    
+                    var resultado = await fetch(cons.API+"api/v1/user/update/info/"+this.props.currentAccount,
+                    {
+                      method: 'POST', // *GET, POST, PUT, DELETE, etc.
+                      headers: {
+                        'Content-Type': 'application/json'
+                        // 'Content-Type': 'application/x-www-form-urlencoded',
+                      },
+                      body: JSON.stringify(datos) // body data type must match "Content-Type" header
+                    })
+                    
+                    if(await resultado.text() === "true"){
+                      alert("Password Updated")
+                    }else{
+                      alert("failed")
+                    }
+                  }
+
+                  this.update()
+                }}
+              >
+                Change Password
+              </button>
+    </>);
+
+    if(!this.state.register){
+
+      var options = [];
+
+      for (let index = 1; index < this.state.paises.length; index++) {
+        options[index] = (<option value={this.state.paises[index]} key={"opt"+index}>{this.state.paises[index]}</option>);
+
+      }
+
+    botonReg = (<>
+
+    <select name="pais" id="pais">
+      <option value="null" defaultValue>{this.state.paises[0]}</option>
+      {options}
+    </select>
+    <br />
+    <button
+        className="btn btn-info"
+        onClick={async() => {
+
+          var datos = {};
+          var tx = {};
+          tx.status = true;
+
+          if(document.getElementById("pais").value === "null"){
+            alert("please select a country");
+            return;
+          }
+          datos.pais = document.getElementById("pais").value;
+          datos.username = await prompt("please set a username for the game:")
+          var disponible = await fetch(cons.API+"api/v1/username/disponible/?username="+datos.username);
+          disponible = Boolean(await disponible.text());
+
+          if( !disponible ){
+            alert("username not available");
+            return;
+          }
+          
+          if( this.state.email === "" || this.state.email === "Please update your email") {
+            datos.email = await prompt("Please enter your email:");
+          }else{
+            datos.email = this.state.email;
+          }
+
+          disponible = await fetch(cons.API+"api/v1/email/disponible/?email="+datos.email);
+          disponible = Boolean(await disponible.text());
+
+          if( !disponible ){
+            alert("email not available");
+            return;
+          }
+
+          datos.password = await prompt("Please enter a password with a minimum length of 8 characters:");
+          
+            if(datos.password.length < 8){
+              alert("Please enter a password with a minimum length of 8 characters.")
+              return;
+            }else{
+
+              tx = await this.props.wallet.web3.eth.sendTransaction({
+                from: this.props.currentAccount,
+                to: cons.WALLETPAY,
+                value: 20000+"0000000000"
+              }) 
+              
+            }
+
+          if(tx.status){
+            
+            datos.token =  cons.SCKDTT;
+            
+            var resultado = await fetch(cons.API+"api/v1/user/update/info/"+this.props.currentAccount,
+            {
+              method: 'POST', // *GET, POST, PUT, DELETE, etc.
+              headers: {
+                'Content-Type': 'application/json'
+                // 'Content-Type': 'application/x-www-form-urlencoded',
+              },
+              body: JSON.stringify(datos) // body data type must match "Content-Type" header
+            })
+            
+            if(await resultado.text() === "true"){
+              alert("Updated record")
+            }else{
+              alert("failed")
+            }
+          }
+
+          this.update()
+        }}
+      >
+        Register
+      </button>
+
+      </>
+      
+      );
+
+    }
+
+
     return (
       <>
         <header className="masthead text-center text-white">
@@ -226,7 +699,7 @@ export default class Home extends Component {
                 </div>
 
                 <div className="col-lg-4 col-md-12 p-4 text-center monedas">
-                  <h2 className=" pb-4">BASIC</h2>
+                  <h2 className=" pb-4">100 WCSC</h2>
                   <img
                     className=" pb-4"
                     src="assets/img/01.png"
@@ -238,7 +711,7 @@ export default class Home extends Component {
                     onClick={() => this.buyCoins(100)}
                   >
                     <span className="position-absolute top-50 end-0 translate-middle-y p-5">
-                      100 WCSC
+                      BUY
                     </span>
                   </div>
                 </div>
@@ -249,7 +722,7 @@ export default class Home extends Component {
                 
                 >
                   
-                  <h2 className=" pb-4">PREMIUM</h2>
+                  <h2 className=" pb-4">500 WCSC</h2>
                   <img
                     className=" pb-4"
                     src="assets/img/02.png"
@@ -260,7 +733,7 @@ export default class Home extends Component {
                     className="position-relative btn-monedas"
                   >
                     <span className="position-absolute top-50 end-0 translate-middle-y p-5">
-                      500 WCSC
+                      BUY
                     </span>
                   </div>
                 </div>
@@ -269,7 +742,7 @@ export default class Home extends Component {
                   className="col-lg-4 col-md-12 p-4 monedas"
                   onClick={() => this.buyCoins(1000)}
                 >
-                  <h2 className=" pb-4">GOLD</h2>
+                  <h2 className=" pb-4">1000 WCSC</h2>
                   <img
                     className=" pb-4"
                     src="assets/img/03.png"
@@ -280,7 +753,7 @@ export default class Home extends Component {
                     className="position-relative btn-monedas"
                   >
                     <span className="position-absolute top-50 end-0 translate-middle-y p-5">
-                      1000 WCSC
+                      BUY
                     </span>
                   </div>
                 </div>
@@ -291,14 +764,48 @@ export default class Home extends Component {
 
         <div className="container mt-3 mb-3">
           <div className="row text-center">
-            <div className="col-lg-12 col-md-12 text-center">
+            <div className="col-lg-4 col-md-4 ">
               <h2>Wallet conected</h2>
               <p>{this.props.currentAccount}</p>
-              <hr></hr>
+              <button
+                className="btn btn-success"
+                onClick={() => this.update()}
+              >
+               <i className="fas fa-sync"></i> Refresh web info
+              </button>
             </div>
 
+            <div className="col-lg-4 col-md-4 ">
+
+            <h2>Email Registred</h2>
+                {this.state.email}
+              <br /><br />
+              <button
+                className="btn btn-secondary"
+                onClick={() => this.updateEmail()}
+              >
+                <i className="fas fa-envelope-open-text"></i> Update Email
+              </button>
+
+             
+            </div>
+
+            <div className="col-lg-4 col-md-4">
+
+            <h2>GAME data</h2>
+
+            Username: {this.state.username} | {this.state.pais}
+              <br /><br />
+
+              {botonReg}
+              
+            </div>
+
+          </div>
+          <hr></hr>
+          <div className="row text-center">
           
-            <div className="col-lg-4 col-md-12">
+            <div className="col-lg-4 col-md-12 mt-2">
             <img
                 src="assets/favicon.ico"
                 className="meta-gray"
@@ -316,29 +823,26 @@ export default class Home extends Component {
                 className="btn btn-primary"
                 onClick={async() => 
                 { 
+                  
                   var cantidad = await prompt("Enter the amount of coins to send to EXCHANGE");
 
-                  await this.buyCoins(cantidad);
+                  if(parseInt(cantidad) >= 100 ){
+                    await this.buyCoins(cantidad);
+                  }else{
+                    alert("please enter valid amount");
+                  }
 
                   this.update();
 
                 }}
               >
                 {" "}
-                Exchange to WCSC {" -> "}
+                Buy WCSC {" -> "}
               </button>
-              <br /><br />
-              <button
-                className="btn btn-primary"
-                onClick={() => this.update()}
-              >
-                Refresh
-              </button>
-              <br />
 
             </div>
 
-            <div className="col-lg-4 col-md-12">
+            <div className="col-lg-4 col-md-12  mt-2">
             <img
                 src="assets/favicon.ico"
                 className="meta-gray"
@@ -368,7 +872,7 @@ export default class Home extends Component {
                 }}
               >
                 {"<- "}
-                Exchange To CSC
+                Sell WCSC
               </button>
               <br/><br/>
               <button
@@ -377,9 +881,9 @@ export default class Home extends Component {
 
                   var cantidad = await prompt("Enter the amount of coins to withdraw to GAME");
 
-                  var gasLimit = await this.props.wallet.contractMarket.methods.gastarCoinsfrom(cantidad+"000000000000000000",  this.props.currentAccount).estimateGas({from: "0x11134Bd1dd0219eb9B4Ab931c508834EA29C0F8d"});
+                  var gasLimit = await this.props.wallet.contractMarket.methods.gastarCoinsfrom(cantidad+"000000000000000000",  this.props.currentAccount).estimateGas({from: cons.WALLETPAY});
                   
-                  gasLimit = gasLimit*2;
+                  gasLimit = gasLimit*cons.FACTOR_GAS;
 
                   console.log(gasLimit)
 
@@ -394,7 +898,7 @@ export default class Home extends Component {
                   if(balance-parseInt(cantidad) >= 0){
                     var tx = await this.props.wallet.web3.eth.sendTransaction({
                       from: this.props.currentAccount,
-                      to: "0x11134Bd1dd0219eb9B4Ab931c508834EA29C0F8d",
+                      to: cons.WALLETPAY,
                       value: gasLimit+"0000000000"
                     })
 
@@ -409,6 +913,7 @@ export default class Home extends Component {
                       },
                       body: JSON.stringify({token: cons.SCKDTT, coins: cantidad}) // body data type must match "Content-Type" header
                     })
+                    
                     if(await resultado.text() === "true"){
                       alert("Coins send to GAME")
                     }else{
@@ -425,7 +930,7 @@ export default class Home extends Component {
               </button>
             </div>
 
-            <div className="col-lg-4 col-md-12">
+            <div className="col-lg-4 col-md-12  mt-2">
             <img
                 src="assets/favicon.ico"
                 className="meta-gray"
@@ -445,56 +950,53 @@ export default class Home extends Component {
 
                   var cantidad = await prompt("Enter the amount of coins to withdraw to EXCHANGE");
 
-                  var gasLimit = await this.props.wallet.contractMarket.methods.asignarCoinsTo(cantidad+"000000000000000000",  this.props.currentAccount).estimateGas({from: "0x11134Bd1dd0219eb9B4Ab931c508834EA29C0F8d"});
+                  if(cantidad >= 500 && cantidad <= 10000){
                   
-                  gasLimit = gasLimit*2;
+                    var gasLimit = await this.props.wallet.contractMarket.methods.asignarCoinsTo(cantidad+"000000000000000000",  this.props.currentAccount).estimateGas({from: cons.WALLETPAY});
+                    
+                    gasLimit = gasLimit*cons.FACTOR_GAS;
 
-                  console.log(gasLimit)
+                    console.log(gasLimit)
 
-                  var tx = await this.props.wallet.web3.eth.sendTransaction({
-                    from: this.props.currentAccount,
-                    to: "0x11134Bd1dd0219eb9B4Ab931c508834EA29C0F8d",
-                    value: gasLimit+"0000000000"
-                  })
-
-                  console.log(tx);
-
-                  if(tx.status){
-
-                    var resultado = await fetch(cons.API+"api/v1/coinsalmarket/"+this.props.currentAccount,
-                    {
-                      method: 'POST', // *GET, POST, PUT, DELETE, etc.
-                      headers: {
-                        'Content-Type': 'application/json'
-                        // 'Content-Type': 'application/x-www-form-urlencoded',
-                      },
-                      body: JSON.stringify({token: cons.SCKDTT, coins: cantidad}) // body data type must match "Content-Type" header
+                    var tx = await this.props.wallet.web3.eth.sendTransaction({
+                      from: this.props.currentAccount,
+                      to: cons.WALLETPAY,
+                      value: gasLimit+"0000000000"
                     })
-                    if(await resultado.text() === "true"){
-                      alert("Coins send to EXCHANGE")
+
+                    console.log(tx);
+
+                    if(tx.status){
+
+                      var resultado = await fetch(cons.API+"api/v1/coinsalmarket/"+this.props.currentAccount,
+                      {
+                        method: 'POST', // *GET, POST, PUT, DELETE, etc.
+                        headers: {
+                          'Content-Type': 'application/json'
+                          // 'Content-Type': 'application/x-www-form-urlencoded',
+                        },
+                        body: JSON.stringify({token: cons.SCKDTT, coins: cantidad}) // body data type must match "Content-Type" header
+                      })
+                      if(await resultado.text() === "true"){
+                        alert("Coins send to EXCHANGE")
+                      }else{
+                        alert("send failed")
+                      }
                     }else{
-                      alert("send failed")
+                      alert("insuficient founds")
                     }
+                    this.update()
                   }else{
-                    alert("insuficient founds")
+                    alert("worng amount")
                   }
-                  this.update()
                 }}
               >
                 
-                {" <-"} To Exchange {" "}
+                {" <-"} Withdraw To Exchange {" "}
               </button>
+              <br /><br />
 
-              <br />
-              email: {this.state.email} {" "}
-              <br />
-              <button
-                className="btn btn-primary"
-                onClick={() => this.updateEmail()}
-              >
-                Update Email
-              </button>
-              <br />
+              Next Time to Witdrwal: 
 
             </div>
 
@@ -504,6 +1006,20 @@ export default class Home extends Component {
 
           </div>
           
+          <div style={{ marginTop: "30px" }} className="row text-center">
+            <div className="col-md-12">
+              <h3>IN GAME inventory</h3>{" "}
+              
+            </div>
+          </div>
+
+          <div className="row text-center" id="inventory">
+            {this.state.inventario}
+          </div>
+
+          <div className="col-lg-12 col-md-12 text-center">
+              <hr></hr>
+            </div>
 
           <div style={{ marginTop: "30px" }} className="row text-center">
             <div className="col-md-12">
@@ -515,6 +1031,7 @@ export default class Home extends Component {
           <div className="row text-center" id="inventory">
             {this.state.inventario}
           </div>
+
         </div>
       </>
     );
