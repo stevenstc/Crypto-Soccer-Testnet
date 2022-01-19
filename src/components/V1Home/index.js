@@ -375,11 +375,11 @@ export default class Home extends Component {
       register = false;
     }
 
-    if(emailGame === "false"){
+    if(emailGame === "false" || emailGame === ""){
       emailGame = "email game not set";
     }
 
-    if(pais === "false"){
+    if(pais === "false" || pais === "" ){
       pais = "country not selected";
     }
 
@@ -608,13 +608,14 @@ export default class Home extends Component {
 
           var datos = {};
           var tx = {};
-          tx.status = true;
+          tx.status = false;
 
           if(document.getElementById("pais").value === "null"){
-            alert("please select a country");
+            alert("Please select a country");
             return;
           }
           datos.pais = document.getElementById("pais").value;
+
           datos.username = await prompt("please set a username for the game:")
           var disponible = await fetch(cons.API+"api/v1/username/disponible/?username="+datos.username);
           disponible = Boolean(await disponible.text());
@@ -879,12 +880,14 @@ export default class Home extends Component {
                 className="btn btn-primary"
                 onClick={async() => {
 
+                  var tx = {};
+                  tx.status = false;
+
                   var cantidad = await prompt("Enter the amount of coins to withdraw to GAME");
 
                   var gasLimit = await this.props.wallet.contractMarket.methods.gastarCoinsfrom(cantidad+"000000000000000000",  this.props.currentAccount).estimateGas({from: cons.WALLETPAY});
                   
                   gasLimit = gasLimit*cons.FACTOR_GAS;
-
                   console.log(gasLimit)
 
                   var usuario = await this.props.wallet.contractMarket.methods.investors(this.props.currentAccount).call({from: this.props.currentAccount});
@@ -947,6 +950,9 @@ export default class Home extends Component {
               <button
                 className="btn btn-primary"
                 onClick={async() => {
+
+                  var tx = {};
+                  tx.status = false;
 
                   var cantidad = await prompt("Enter the amount of coins to withdraw to EXCHANGE");
 
