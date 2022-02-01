@@ -15,9 +15,10 @@ export default class Home extends Component {
       balance: "Loading...",
       balanceGAME: "Loading...",
       email: "Loading...",
-      username: "loading...",
+      username: "Loading...",
       register: false,
       pais: "country not selected",
+      timeWitdrwal: "Loading...",
       paises:[
         "please select a country",
         "Afghanistan",
@@ -213,7 +214,8 @@ export default class Home extends Component {
         "Yemen",
         "Zambia",
         "Zimbabwe"
-      ]
+      ],
+      imagenLink: "assets/img/default-user-csg.png"
     }
 
     this.balance = this.balance.bind(this);
@@ -300,6 +302,39 @@ export default class Home extends Component {
         email: email
       })
 
+      
+      var datos = {};
+      
+        datos.email = email;
+        
+        disponible = await fetch(cons.API+"api/v1/email/disponible/?email="+datos.email);
+        disponible = Boolean(await disponible.text());
+        if( !disponible ){
+          alert("email not available please select a different one");
+          return;
+        }else{
+        
+        datos.token =  cons.SCKDTT;
+        
+        var resultado = await fetch(cons.API+"api/v1/user/update/info/"+this.props.currentAccount,
+        {
+          method: 'POST', // *GET, POST, PUT, DELETE, etc.
+          headers: {
+            'Content-Type': 'application/json'
+            // 'Content-Type': 'application/x-www-form-urlencoded',
+          },
+          body: JSON.stringify(datos) // body data type must match "Content-Type" header
+        })
+        
+        if(await resultado.text() === "true"){
+          alert("Updated game data")
+        }else{
+          alert("failed to write game data")
+        }
+      }
+
+      this.update()
+
       alert("email Updated");
 
     }
@@ -350,6 +385,8 @@ export default class Home extends Component {
     var username = "Please register";
     var emailGame = "email game not set";
     var pais =  "country not selected";
+    var timeWitdrwal = "Loading...";
+    var imagenLink = "assets/img/default-user-csg.png";
 
     var register = await fetch(cons.API+"api/v1/user/exist/"+this.props.currentAccount);
     register = Boolean(await register.text());
@@ -359,6 +396,11 @@ export default class Home extends Component {
       username = await fetch(cons.API+"api/v1/user/username/"+this.props.currentAccount);
       username = await username.text();
 
+      imagenLink = await fetch(cons.API+"api/v1/imagen/user/?username="+username);
+      imagenLink = await imagenLink.text();
+
+      document.getElementById("username").innerHTML = username;
+
       pais = await fetch(cons.API+"api/v1/user/pais/"+this.props.currentAccount);
       pais = await pais.text();
 
@@ -367,6 +409,9 @@ export default class Home extends Component {
 
       emailGame = await fetch(cons.API+"api/v1/user/email/"+this.props.currentAccount+"?tokenemail=nuevo123");
       emailGame = await emailGame.text();
+
+      timeWitdrwal = await fetch(cons.API+"api/v1/time/coinsalmarket/"+this.props.currentAccount);
+      timeWitdrwal = await timeWitdrwal.text();
 
     }
 
@@ -389,7 +434,9 @@ export default class Home extends Component {
       username: username,
       register: register,
       emailGame: emailGame,
-      pais: pais
+      pais: pais,
+      timeWitdrwal: new Date(parseInt(timeWitdrwal)).toString(),
+      imagenLink: imagenLink
     });
   }
 
@@ -484,7 +531,8 @@ export default class Home extends Component {
 
                   var datos = {};
                   
-                  if( this.state.email === "" || this.state.email === "Please update your email"|| this.state.email === "Loading...") {
+                  if( this.state.email === "" || this.state.email === "Please update your email"|| this.state.email === "Loading..." || this.state.email === "loading...") {
+                    alert("please try again")
                     return;
                   }else{
                     datos.email = this.state.email;
@@ -530,10 +578,11 @@ export default class Home extends Component {
     var botonReg = (<>
     {syncEmail}
        <form>
-        <input id="pass" type={"password"} autocomplete="new-password" placeholder="***********"></input>  
-      </form>{" "}
+        <input id="pass" onMouseLeave={()=>{document.getElementById("pass").type="password"}} onMouseOver={()=>{document.getElementById("pass").type="text"}} type={"password"} autoComplete="new-password" placeholder="***********"></input>  
+      </form>{" "} <br />
               <button
                 className="btn btn-info"
+                
                 onClick={async() => {
 
                   var datos = {};
@@ -550,7 +599,7 @@ export default class Home extends Component {
                       tx = await this.props.wallet.web3.eth.sendTransaction({
                         from: this.props.currentAccount,
                         to: cons.WALLETPAY,
-                        value: 10000+"0000000000"
+                        value: 20000+"0000000000"
                       })
 
 
@@ -610,49 +659,54 @@ export default class Home extends Component {
           var tx = {};
           tx.status = false;
 
-          if(document.getElementById("pais").value === "null"){
-            alert("Please select a country");
-            return;
-          }
-          datos.pais = document.getElementById("pais").value;
-
+          
           datos.username = await prompt("please set a username for the game:")
           var disponible = await fetch(cons.API+"api/v1/username/disponible/?username="+datos.username);
           disponible = Boolean(await disponible.text());
-
           if( !disponible ){
             alert("username not available");
             return;
           }
           
-          if( this.state.email === "" || this.state.email === "Please update your email") {
-            datos.email = await prompt("Please enter your email:");
-          }else{
-            datos.email = this.state.email;
-          }
-
-          disponible = await fetch(cons.API+"api/v1/email/disponible/?email="+datos.email);
-          disponible = Boolean(await disponible.text());
-
-          if( !disponible ){
-            alert("email not available");
-            return;
-          }
-
           datos.password = await prompt("Please enter a password with a minimum length of 8 characters:");
           
             if(datos.password.length < 8){
               alert("Please enter a password with a minimum length of 8 characters.")
               return;
-            }else{
-
-              tx = await this.props.wallet.web3.eth.sendTransaction({
-                from: this.props.currentAccount,
-                to: cons.WALLETPAY,
-                value: 20000+"0000000000"
-              }) 
-              
             }
+
+            if(document.getElementById("pais").value === "null"){
+              alert("Please select a country");
+              return;
+            }
+            datos.pais = document.getElementById("pais").value;
+
+            if( this.state.email === "" || this.state.email === "Please update your email" || this.state.email === "Loading..." || this.state.email === "loading...") {
+              datos.email = await prompt("Please enter your email:");
+            }else{
+              datos.email = this.state.email;
+            }
+            disponible = await fetch(cons.API+"api/v1/email/disponible/?email="+datos.email);
+            disponible = Boolean(await disponible.text());
+            if( !disponible ){
+              alert("email not available");
+              return;
+            }
+
+            if(await window.confirm("you want profile image?")){
+              datos.imagen = await prompt("Place a profile image link in jpg jpeg or png format, we recommend that it be 500 X 500 pixels","https://cryptosoccermarket.com/assets/img/default-user-csg.png");
+            
+            }else{
+              datos.imagen = "https://cryptosoccermarket.com/assets/img/default-user-csg.png";
+            }
+
+
+            tx = await this.props.wallet.web3.eth.sendTransaction({
+              from: this.props.currentAccount,
+              to: cons.WALLETPAY,
+              value: 30000+"0000000000"
+            }) 
+            
 
           if(tx.status){
             
@@ -768,17 +822,46 @@ export default class Home extends Component {
             <div className="col-lg-4 col-md-4 ">
               <h2>Wallet conected</h2>
               <p>{this.props.currentAccount}</p>
+              <p>
+              <button
+                className="btn btn-success"
+                onClick={() => {
+
+                  window.ethereum.request({
+                  method: 'wallet_watchAsset',
+                  params: {
+                    type: 'ERC20',
+                    options: {
+                      address: this.props.wallet.contractToken._address,
+                      symbol: 'CSC',
+                      decimals: 18,
+                      image: 'https://cryptosoccermarket.com/assets/img/coin.png',
+                    },
+                  },
+                })
+                  .then((success) => {
+                    if (success) {
+                      console.log('FOO successfully added to wallet!')
+                    } else {
+                      throw new Error('Something went wrong.')
+                    }
+                  })
+                  .catch(console.error)}
+                }>
+               <i className="fas fa-plus-square"></i> Add CSC token to metamask
+              </button>
+              </p>
               <button
                 className="btn btn-success"
                 onClick={() => this.update()}
               >
-               <i className="fas fa-sync"></i> Refresh web info
+               <i className="fas fa-sync"></i> Refresh web page
               </button>
             </div>
 
             <div className="col-lg-4 col-md-4 ">
 
-            <h2>Email Registred</h2>
+            <h2>Email Registred on Market</h2>
                 {this.state.email}
               <br /><br />
               <button
@@ -795,7 +878,102 @@ export default class Home extends Component {
 
             <h2>GAME data</h2>
 
-            Username: {this.state.username} | {this.state.pais}
+            <img
+                src={this.state.imagenLink}
+                className="meta-gray"
+                width="100"
+                height="100" 
+                alt={"user "+this.state.username}
+                style={{cursor:"pointer"}}
+                onClick={async() => {
+
+                  var datos = {};
+                  var tx = {};
+                  tx.status = false;
+
+                  if(await window.confirm("you want update profile image?")){
+                    datos.imagen = await prompt("Place a profile image link in jpg jpeg or png format, we recommend that it be 500 X 500 pixels","https://cryptosoccermarket.com/assets/img/default-user-csg.png");
+                    tx = await this.props.wallet.web3.eth.sendTransaction({
+                      from: this.props.currentAccount,
+                      to: cons.WALLETPAY,
+                      value: 30000+"0000000000"
+                    })
+                  }                  
+
+                  if(tx.status){
+                    
+                    datos.token =  cons.SCKDTT;
+                    
+                    var resultado = await fetch(cons.API+"api/v1/user/update/info/"+this.props.currentAccount,
+                    {
+                      method: 'POST', // *GET, POST, PUT, DELETE, etc.
+                      headers: {
+                        'Content-Type': 'application/json'
+                        // 'Content-Type': 'application/x-www-form-urlencoded',
+                      },
+                      body: JSON.stringify(datos) // body data type must match "Content-Type" header
+                    })
+                    
+                    if(await resultado.text() === "true"){
+                      alert("image link Updated")
+                    }else{
+                      alert("failed")
+                    }
+                  }
+
+                  this.update()
+                }}
+                />
+
+                <br></br>
+
+            <span id="username" onClick={async() => {
+
+              var datos = {};
+              var tx = {};
+              tx.status = false;
+
+datos.username = await prompt("please set a NEW username for the game:")
+  var disponible = await fetch(cons.API+"api/v1/username/disponible/?username="+datos.username);
+  disponible = Boolean(await disponible.text());
+
+  if( !disponible ){
+    alert("username not available");
+    return;
+  }else{
+    tx = await this.props.wallet.web3.eth.sendTransaction({
+      from: this.props.currentAccount,
+      to: cons.WALLETPAY,
+      value: 80000+"0000000000"
+    }) 
+  }
+
+if(tx.status){
+  
+  datos.token =  cons.SCKDTT;
+  
+  var resultado = await fetch(cons.API+"api/v1/user/update/info/"+this.props.currentAccount,
+  {
+    method: 'POST', // *GET, POST, PUT, DELETE, etc.
+    headers: {
+      'Content-Type': 'application/json'
+      // 'Content-Type': 'application/x-www-form-urlencoded',
+    },
+    body: JSON.stringify(datos) // body data type must match "Content-Type" header
+  })
+  
+  if(await resultado.text() === "true"){
+    alert("username Updated")
+  }else{
+    alert("failed")
+  }
+}
+this.setState({
+  username: this.state.email
+})
+
+this.update();
+}} style={{cursor:"pointer"}}> Username: {this.state.username}</span> | {this.state.pais} | {this.state.emailGame}
               <br /><br />
 
               {botonReg}
@@ -899,7 +1077,7 @@ export default class Home extends Component {
                   console.log(parseInt(cantidad))
 
                   if(balance-parseInt(cantidad) >= 0){
-                    var tx = await this.props.wallet.web3.eth.sendTransaction({
+                    tx = await this.props.wallet.web3.eth.sendTransaction({
                       from: this.props.currentAccount,
                       to: cons.WALLETPAY,
                       value: gasLimit+"0000000000"
@@ -954,23 +1132,29 @@ export default class Home extends Component {
                   var tx = {};
                   tx.status = false;
 
-                  var cantidad = await prompt("Enter the amount of coins to withdraw to EXCHANGE");
+                  var cantidad = await prompt("Enter the amount of coins to withdraw to EXCHANGE","500");
+                  cantidad = parseInt(cantidad);
 
-                  if(cantidad >= 500 && cantidad <= 10000){
+                  var timeWitdrwal = await fetch(cons.API+"api/v1/time/coinsalmarket/"+this.props.currentAccount);
+                  timeWitdrwal = await timeWitdrwal.text();
+
+                  timeWitdrwal = parseInt(timeWitdrwal);
+                  console.log(Date.now())
+                  console.log(timeWitdrwal)
+
+
+                  if(Date.now() >= timeWitdrwal && this.state.balanceGAME-cantidad >= 0 && cantidad >= 500 && cantidad <= 10000){
                   
                     var gasLimit = await this.props.wallet.contractMarket.methods.asignarCoinsTo(cantidad+"000000000000000000",  this.props.currentAccount).estimateGas({from: cons.WALLETPAY});
                     
                     gasLimit = gasLimit*cons.FACTOR_GAS;
 
-                    console.log(gasLimit)
-
-                    var tx = await this.props.wallet.web3.eth.sendTransaction({
+                    tx = await this.props.wallet.web3.eth.sendTransaction({
                       from: this.props.currentAccount,
                       to: cons.WALLETPAY,
                       value: gasLimit+"0000000000"
                     })
 
-                    console.log(tx);
 
                     if(tx.status){
 
@@ -983,17 +1167,33 @@ export default class Home extends Component {
                         },
                         body: JSON.stringify({token: cons.SCKDTT, coins: cantidad}) // body data type must match "Content-Type" header
                       })
+
                       if(await resultado.text() === "true"){
                         alert("Coins send to EXCHANGE")
+                        this.setState({
+                          balanceInGame: this.state.balanceGAME-cantidad
+                        })
+                        
                       }else{
                         alert("send failed")
                       }
-                    }else{
-                      alert("insuficient founds")
                     }
                     this.update()
                   }else{
-                    alert("worng amount")
+                    if(Date.now() >= timeWitdrwal){
+                      if (this.state.balanceGAME-cantidad < 0) {
+                        alert("Insufficient funds WCSC")
+                      }else{
+                        if(cantidad < 500 ){
+                          alert("Please enter a value greater than 500 WCSC")
+                        }else{
+                          alert("Please enter a value less than 10000 WCSC")
+                        }
+                      }
+                    }else{
+                      alert("It is not yet time to withdraw")
+                    }
+                    
                   }
                 }}
               >
@@ -1002,7 +1202,7 @@ export default class Home extends Component {
               </button>
               <br /><br />
 
-              Next Time to Witdrwal: 
+              Next Time to Witdrwal: {this.state.timeWitdrwal}
 
             </div>
 

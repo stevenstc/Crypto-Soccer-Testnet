@@ -6,6 +6,7 @@ import Home from "../V1Home";
 import Market from "../Market";
 import Fan from "../HomeFan";
 import Staking from "../HomeStaking"
+import Faucet from "../Faucet";
 import TronLinkGuide from "../TronLinkGuide";
 import cons from "../../cons"
 
@@ -53,15 +54,16 @@ class App extends Component {
 
   async componentDidMount() {
 
-    await window.ethereum.request({
-      method: 'wallet_switchEthereumChain',
-      params: [{ chainId: chainId}],
-    });
-
     //TESTNET  '0x61'
     //mainet  '0x38'
 
-      if (typeof window.ethereum !== 'undefined') {           
+      if (typeof window.ethereum !== 'undefined') {    
+        
+        await window.ethereum.request({
+          method: 'wallet_switchEthereumChain',
+          params: [{ chainId: chainId}],
+        });
+        
         window.ethereum.request({ method: 'eth_requestAccounts' })
         .then((accounts) => {
           //console.log(accounts)
@@ -118,8 +120,7 @@ class App extends Component {
 
     try {       
       var web3 = new Web3(window.web3.currentProvider);
-      //var web3 = new Web3(window.web3.providers.HttpProvider("https://data-seed-prebsc-1-s1.binance.org:8545/")); // TESTNET  '0x61'
-      //var web3 = new Web3(window.web3.providers.HttpProvider("https://bsc-dataseed.binance.org/"));// mainet... 
+
       var contractToken = new web3.eth.Contract(
         abiToken,
         addressToken
@@ -186,6 +187,8 @@ class App extends Component {
         return(<Staking wallet={this.state.binanceM} currentAccount={this.state.currentAccount}/>);
       case "market":
         return(<Market wallet={this.state.binanceM} currentAccount={this.state.currentAccount}/>);
+      case "faucet": 
+        return(<Faucet wallet={this.state.binanceM} currentAccount={this.state.currentAccount}/>);
       default:
         return(<Home wallet={this.state.binanceM} currentAccount={this.state.currentAccount}/>);
     }
