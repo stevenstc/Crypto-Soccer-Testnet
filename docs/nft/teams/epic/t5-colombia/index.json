@@ -1,0 +1,36 @@
+{
+  "title": "Team Epic",
+  "name": "Colombia",
+  "image": "https://cryptosoccermarket.com/nft/teams/epic/t5-colombia/img.png",
+  "fileUrl": "https://cryptosoccermarket.com/nft/teams/epic/t5-colombia/img.png",
+  "description": "CryptoSoccer Game Asset",
+  "externalLink": "https://cryptosoccermarket.com/",
+  "attributes": [
+    {
+      "trait_type": "Creator",
+      "value": "CryptoSoccer"
+    }
+  ],
+  "properties": {
+    "name": {
+      "type": "string",
+      "description": "Team Epic: Colombia"
+    },
+    "description": {
+      "type": "string",
+      "description": "CryptoSoccer Game Asset"
+    },
+    "image":{
+      "type": "string",
+      "description": "https://cryptosoccermarket.com/nft/teams/epic/t5-colombia/img.png"
+    },
+    "created_at": {
+      "type": "datetime",
+      "description": "2022-06-09T00:00:00.628Z"
+    },
+    "digital_media_file_type": {
+      "type": "string",
+      "description": "collectible"
+    }
+  }
+}

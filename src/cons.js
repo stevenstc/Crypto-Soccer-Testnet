@@ -22,7 +22,7 @@ const TESTNET = true;
 
 if(TESTNET){
     TOKEN = "0x038987095f309d3640F51644430dc6C7C4E2E409"; //token de pruebas
-    SC = "0xD4e1471f52Db95BdD68CCBdA7c603822AF5f54fb";// contrato test market
+    SC = "0xfF7009EF7eF85447F6A5b3f835C81ADd60a321C9";// contrato test market
     SC2 = "0xC4cC639697DBA2802386386279927C5b894Ec7a7";// contrado test fan youtuber
     SC3 = "0xebCC8F716087B6Bd4AF31759B8F7041ebEC5E820";// contrado test Staking
     SC5 = "0x99dB6D082E5abD682dC8F4791F10FB39Bc334a9c"; // Market V2
