@@ -1,1 +1,0 @@
-roket = "CriptoSokker2021"

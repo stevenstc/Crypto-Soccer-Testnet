@@ -26,15 +26,15 @@ export default class Market extends Component {
 
   async componentDidMount() {
 
-    await this.update();
+    this.update();
 
   }
 
   async update() {
 
-    await this.balance();
-    await this.inventario();
-    await this.items();
+    this.balance();
+    this.inventario();
+    this.items();
 
   }
 
@@ -181,7 +181,7 @@ export default class Market extends Component {
         listItems[index]= item;
         //console.log(item)
         itemsYoutube[index] = (
-            <div className="col-lg-3 col-md-6 p-3 mb-5 text-center monedas position-relative" key={`items-${index}`}>
+            <div className="col-lg-3 col-md-6 p-3 mb-5 text-center monedas position-relative border" key={`items-${index}`}>
               <h2 className=" pb-2"> Item #{index+1}</h2>
               <img
                 className=" pb-2"
@@ -197,20 +197,17 @@ export default class Market extends Component {
 
               <h2 className=" pb-2">{item.tipo}</h2>
               
-              <div
-                className="position-relative btn-monedas"
-                onClick={() => {
+              <div className="position-relative">
+                <button className="btn btn-success" onClick={() => {
                   if(listItems[index].ilimitado || parseInt(listItems[index].cantidad) > 0){
                     this.buyItem(index);
                   }else{
                     alert("Sold Out")
                   }
                   
-                }}
-              >
-                <span className="position-absolute top-50 end-0 translate-middle-y p-5" >
-                  {item.valor/10**18}
-                </span>
+                }}>
+                  Buy for {item.valor/10**18} CSC
+                </button>
               </div>
             </div>
         );
@@ -257,11 +254,11 @@ export default class Market extends Component {
 
   render() {
     return (
-      <><header className="masthead text-center text-white">
+      <><header className="masthead text-center ">
       <div className="masthead-content">
         <div className="container px-5">
         <div className="row">
-            <div className="col-lg-12 col-md-12 p-4 text-center bg-secondary bg-gradient">
+            <div className="col-lg-12 col-md-12 p-4 text-center bg-secondary bg-gradient text-white">
               <h2 className=" pb-4">CSC available:</h2><br></br>
               <h3 className=" pb-4">{this.state.balance}</h3>
             </div>
