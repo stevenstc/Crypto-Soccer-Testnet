@@ -1,18 +1,35 @@
 pragma solidity >=0.8.0;
 // SPDX-License-Identifier: Apache 2.0
 
-
 interface TRC20_Interface {
 
     function allowance(address _owner, address _spender) external view returns (uint remaining);
-
     function transferFrom(address _from, address _to, uint _value) external returns (bool);
-
     function transfer(address direccion, uint cantidad) external returns (bool);
-
     function balanceOf(address who) external view returns (uint256);
-
     function decimals() external view returns(uint);
+}
+
+interface IMARKETV1 {
+  function largoInventario(address _user) external view returns(uint256);
+}
+
+interface ITRC721 {
+
+    function balanceOf(address owner) external view returns (uint256 balance);
+    function ownerOf(uint256 tokenId) external view returns (address owner);
+    function safeTransferFrom(address from, address to, uint256 tokenId) external;
+    function transferFrom(address from, address to, uint256 tokenId) external;
+    function approve(address to, uint256 tokenId) external;
+    function getApproved(uint256 tokenId) external view returns (address operator);
+
+    function setApprovalForAll(address operator, bool _approved) external;
+    function isApprovedForAll(address owner, address operator) external view returns (bool);
+
+    function safeTransferFrom(address from, address to, uint256 tokenId, bytes memory data) external;
+
+    function mintWithTokenURI(address to, uint256 tokenId, string memory tokenURI) external;
+    function totalSupply() external view returns (uint256);
 }
 
 library SafeMath {
@@ -51,30 +68,17 @@ library SafeMath {
 
 }
 
-contract Context {
-  constructor () { }
-
-  function _msgSender() internal view virtual returns (address) {
-      return msg.sender;
-  }
-
-  function _msgData() internal view virtual returns (bytes calldata) {
-      this; 
-      return msg.data;
-  }
-}
-
-contract Ownable is Context {
+contract Ownable {
   address payable public owner;
 
   event OwnershipTransferred(address indexed previousOwner, address indexed newOwner);
 
   constructor(){
-    owner = payable(_msgSender());
+    owner = payable(msg.sender);
   }
 
   modifier onlyOwner() {
-    if(_msgSender() != owner)revert();
+    if(msg.sender != owner)revert();
     _;
   }
 
@@ -86,18 +90,18 @@ contract Ownable is Context {
 
 }
 
-contract Admin is Context, Ownable{
+contract Admin is Ownable{
   mapping (address => bool) public admin;
 
   event NewAdmin(address indexed admin);
   event AdminRemoved(address indexed admin);
 
   constructor(){
-    admin[_msgSender()] = true;
+    admin[msg.sender] = true;
   }
 
   modifier onlyAdmin() {
-    if(!admin[_msgSender()])revert();
+    if(!admin[msg.sender])revert();
     _;
   }
 
@@ -116,12 +120,28 @@ contract Admin is Context, Ownable{
 
 }
 
-contract Market is Context, Admin{
+contract Market_V2 is Admin{
   using SafeMath for uint256;
-  
+
+  address public tokenTRC721 = 0xf0218BBD50DdF065b7A43862FD9e27ee1925c050;
+
+  bool public printNfts = true;
+
+  address[] public WALLETS_PRINT_NFT_CSC = [0x0c4c6519E8B6e4D9c99b09a3Cda475638c930b00,0x000000000000000000000000000000000000dEaD,0x004769eF6aec57EfBF56c24d0A04Fe619fBB6143];
+  uint256[] public PRINT_NFT_CSC = [500 * 10**18,500 * 10**18,500 * 10**18];
+ 
   address public token = 0xF0fB4a5ACf1B1126A991ee189408b112028D7A63;
   address public adminWallet = 0x004769eF6aec57EfBF56c24d0A04Fe619fBB6143;
   uint256 public ventaPublica = 1635349239;
+
+  uint256 public MIN_CSC = 500 * 10**18;
+  uint256 public MAX_CSC = 10000 * 10**18;
+
+  uint256 public TIME_CLAIM = 7 * 86400;
+
+  IMARKETV1 MARKET_V1 = IMARKETV1(0xfF7009EF7eF85447F6A5b3f835C81ADd60a321C9);
+  
+  ITRC721 TRC721_Contract = ITRC721(tokenTRC721);
 
   TRC20_Interface CSC_Contract = TRC20_Interface(token);
   TRC20_Interface OTRO_Contract = TRC20_Interface(token);
@@ -134,10 +154,11 @@ contract Market is Context, Admin{
   }
 
   struct Investor {
-    bool registered;
-    string correo;
+    bool baneado;
     uint256 balance;
-    uint256 gastado;
+    uint256 payAt;
+    uint256 almacen;
+    uint256 printItems;
   }
 
   struct Item {
@@ -150,26 +171,26 @@ contract Market is Context, Admin{
   }
   
   mapping (address => Investor) public investors;
-  mapping (address => Item[]) public inventario;
-  
+  mapping (address => uint256[]) public IDNft;
+
+
   Item[] public items;
-  Tipos[] public opciones;
 
   uint256 ingresos;
   uint256 retiros;
 
   constructor() {
-     
-    items.push(
-    Item(
+
+    items.push(Item(
     {
       nombre:"t1-brazil-legendario",
       tipo: "legendario",
       valor: 1250 * 10**18,
       acumulable: false,
       ilimitado: false,
-      cantidad: 1000
+      cantidad: 0
     }));
+     
     items.push(
     Item(
     {
@@ -178,7 +199,7 @@ contract Market is Context, Admin{
       valor: 1250 * 10**18,
       acumulable: false,
       ilimitado: false,
-      cantidad: 1000
+      cantidad: 0
     }));
     items.push(
     Item(
@@ -188,7 +209,7 @@ contract Market is Context, Admin{
       valor: 1250 * 10**18,
       acumulable: false,
       ilimitado: false,
-      cantidad: 1000
+      cantidad: 0
     }));
     items.push(
     Item(
@@ -198,7 +219,7 @@ contract Market is Context, Admin{
       valor: 875 * 10**18,
       acumulable: false,
       ilimitado: false,
-      cantidad: 500
+      cantidad: 0
     }));
     items.push(
     Item(
@@ -208,7 +229,7 @@ contract Market is Context, Admin{
       valor: 875 * 10**18,
       acumulable: false,
       ilimitado: false,
-      cantidad: 500
+      cantidad: 0
     }));
     items.push(
     Item(
@@ -218,7 +239,7 @@ contract Market is Context, Admin{
       valor: 875 * 10**18,
       acumulable: false,
       ilimitado: false,
-      cantidad: 1500
+      cantidad: 0
     }));
     items.push(
     Item(
@@ -228,7 +249,7 @@ contract Market is Context, Admin{
       valor: 875 * 10**18,
       acumulable: false,
       ilimitado: false,
-      cantidad: 750
+      cantidad: 0
     }));
     items.push(
     Item(
@@ -238,7 +259,7 @@ contract Market is Context, Admin{
       valor: 875 * 10**18,
       acumulable: false,
       ilimitado: false,
-      cantidad: 500
+      cantidad: 0
     }));
     items.push(
     Item(
@@ -248,7 +269,7 @@ contract Market is Context, Admin{
       valor: 875 * 10**18,
       acumulable: false,
       ilimitado: false,
-      cantidad: 750
+      cantidad: 0
     }));
     items.push(
     Item(
@@ -258,160 +279,91 @@ contract Market is Context, Admin{
       valor: 875 * 10**18,
       acumulable: false,
       ilimitado: false,
-      cantidad: 500
+      cantidad: 0
     }));
 
-    opciones.push( 
-    Tipos({
-      tipo :"legendario",
-      ilimitados: false,
-      cantidad: 1}
-    ));
-    opciones.push(
-    Tipos({
-      tipo :"epico",
-      ilimitados: false,
-      cantidad: 1}
-    ));
-
   }
 
-  function registro(string memory _correo) public{
-    
-    Investor storage usuario = investors[_msgSender()];
+  function printItem( address _user, string memory _metadata) public returns(bool){
 
-    if(usuario.registered)revert();
-   
-    usuario.registered = true;
-    usuario.correo = _correo;
+    if(!printNfts)revert();
 
-  }
+    if(MARKET_V1.largoInventario(_user)<=0)revert();
 
-  function updateRegistro(string memory _correo) public{
-    
-    Investor storage usuario = investors[_msgSender()];
+    Investor memory usuario = investors[_user];
+ 
+    if ( usuario.baneado )revert();
 
-    if(!usuario.registered)revert();
-   
-    usuario.correo = _correo;
+    if (usuario.printItems >= 2)revert();
 
-  }
-
-  function updateRegistroMaster(address _user, string memory _correo) public onlyOwner{
-    
-    Investor storage usuario = investors[_user];
-
-    if(!usuario.registered)revert();
-   
-    usuario.correo = _correo;
-
-  }
-
-  function viewDuplicatedItem(uint256 _id) private view returns(bool){
-
-    Item memory item = items[_id];
-    Item[] memory myInventario = inventario[_msgSender()];
-    bool duplicado = false;
-    
-
-     for (uint256 i = 0; i < myInventario.length; i++) {
-
-       if(keccak256(abi.encodePacked(myInventario[i].nombre)) == keccak256(abi.encodePacked(item.nombre))){
-         duplicado = true;
-         break;
-       }
-
-       if(keccak256(abi.encodePacked(myInventario[i].tipo)) == keccak256(abi.encodePacked(item.tipo))){
-         uint256 cantidad = 0;
-         for (uint256 e = 0; e < opciones.length; e++) {
-           if(keccak256(abi.encodePacked(myInventario[i].tipo)) == keccak256(abi.encodePacked(opciones[e].tipo))){
-             cantidad++;
-             if(cantidad >= opciones[e].cantidad && !opciones[e].ilimitados){
-                duplicado = true;
-                break;
-              }
-           }
-            
-         }
-         
-       }
-       
-     }
-
-     return duplicado;
-
-  }
-  
-  function buyItem(uint256 _id) public returns(bool){
-
-    if(block.timestamp < ventaPublica)revert();
-
-    Investor memory usuario = investors[_msgSender()];
-    Item memory item = items[_id];
-
-    if (!item.acumulable){
-      if (viewDuplicatedItem(_id))revert();
+    for (uint256 index = 0; index < WALLETS_PRINT_NFT_CSC.length; index++) {
+      if(!CSC_Contract.transferFrom(msg.sender, WALLETS_PRINT_NFT_CSC[index], PRINT_NFT_CSC[index]))revert();
     }
-    
-    if ( !usuario.registered)revert();
-    if ( !item.ilimitado){
-      if(item.cantidad == 0)revert();
-    }
-    
-    if( CSC_Contract.allowance(_msgSender(), address(this)) < item.valor )revert();
-    if(!CSC_Contract.transferFrom(_msgSender(), adminWallet, item.valor))revert();
-    
-    if ( !item.ilimitado){
-      items[_id].cantidad -= 1;
-    }
-    
-    inventario[_msgSender()].push(item);
-    ingresos += item.valor;
+
+    TRC721_Contract.mintWithTokenURI(_user, TRC721_Contract.totalSupply(), _metadata);
+    usuario.printItems++;
 
     return true;
       
   }
 
-   function buyCoins(uint256 _value) public returns(bool){
+  function buyCoins(uint256 _value) public returns(bool){
 
-    Investor storage usuario = investors[_msgSender()];
+    Investor storage usuario = investors[msg.sender];
 
-    if ( !usuario.registered) revert();
+    if ( usuario.baneado) revert();
 
-    if( CSC_Contract.allowance(_msgSender(), address(this)) < _value )revert();
-    if(!CSC_Contract.transferFrom(_msgSender(), address(this), _value))revert();
-  
-    usuario.balance += _value;
-    ingresos += _value;
+    if(!CSC_Contract.transferFrom(msg.sender, address(this), _value))revert();
+    usuario.balance = usuario.balance.add(_value);
+    ingresos = ingresos.add(_value);
 
     return true;
+    
+  }
+
+  function asignarCoinsTo(uint256 _value, address _user) public onlyAdmin returns(bool){
+
+    Investor storage usuario = investors[_user];
+
+    if ( usuario.baneado) revert();
+      
+    usuario.balance += _value;
+
+    return true;
+      
     
   }
 
   function sellCoins(uint256 _value) public returns (bool) {
-      Investor storage usuario = investors[_msgSender()];
 
-      if (!usuario.registered) revert();
-      if (usuario.gastado+_value > usuario.balance)revert();
+      if(_value < MIN_CSC)revert();
+      if(_value > MAX_CSC)revert();
+      Investor storage usuario = investors[msg.sender];
+
+      if(block.timestamp > usuario.payAt.add(TIME_CLAIM))revert();
+
+      if (usuario.baneado) revert();
+      if (_value > usuario.balance)revert();
 
       if (CSC_Contract.balanceOf(address(this)) < _value)
           revert();
-      if (!CSC_Contract.transfer(_msgSender(),  _value))
+      if (!CSC_Contract.transfer(msg.sender,  _value))
           revert();
 
-      usuario.gastado += _value;
+      usuario.balance -= _value;
       retiros += _value;
+      usuario.payAt = block.timestamp;
 
       return true;
-    }
+  }
 
-  function gastarCoins(uint256 _value) public returns(bool){
+function gastarCoinsfrom(uint256 _value, address _user) public onlyAdmin returns(bool){
 
-    Investor storage usuario = investors[_msgSender()];
+    Investor storage usuario = investors[_user];
 
-    if ( !usuario.registered && usuario.gastado.add(_value) > usuario.balance) revert();
+    if ( usuario.baneado || _value > usuario.balance) revert();
       
-    usuario.gastado += _value;
+    usuario.balance -= _value;
 
     return true;
     
@@ -452,34 +404,9 @@ contract Market is Context, Admin{
     
   }
 
-  function addOption(string memory _tipo, bool _ilimitado, uint256 _cantidad) public onlyOwner returns(bool) {
-
-    opciones.push(
-      Tipos({
-      tipo : _tipo,
-      ilimitados: _ilimitado,
-      cantidad: _cantidad})
-    );
-    return true;
-
-  }
-
-  function editOption(uint256 _id, string memory _tipo, bool _ilimitado, uint256 _cantidad) public onlyOwner returns(bool) {
-
-    opciones[_id] = 
-      Tipos({
-      tipo : _tipo,
-      ilimitados: _ilimitado,
-      cantidad: _cantidad});
-    return true;
-
-  }
-
   function largoInventario(address _user) public view returns(uint256){
 
-    Item[] memory invent = inventario[_user];
-
-    return invent.length;
+    return IDNft[_user].length;
       
   }
 
@@ -488,38 +415,31 @@ contract Market is Context, Admin{
     return items.length;
       
   }
+
+  function updatePrintNfts(bool _truefalse)public onlyOwner{
+    printNfts = _truefalse;
+  }
+
   
-  function largoOptions() public view returns(uint256){
-
-    return opciones.length;
-      
+  function updateWalletsPrints(address[] memory _wallets, uint256[] memory _valores)public onlyOwner{
+    WALLETS_PRINT_NFT_CSC = _wallets;
+    PRINT_NFT_CSC = _valores;
   }
 
-  function gastarCoinsfrom(uint256 _value, address _user) public onlyAdmin returns(bool){
-
-    Investor storage usuario = investors[_user];
-
-    if ( !usuario.registered && usuario.gastado.add(_value) > usuario.balance) revert();
-      
-    usuario.gastado += _value;
-
-    return true;
-    
+  function updateMinMax(uint256 _min, uint256 _max)public onlyOwner{
+    MIN_CSC = _min;
+    MAX_CSC = _max;
   }
 
-  function asignarCoinsTo(uint256 _value, address _user) public onlyAdmin returns(bool){
-
-    Investor storage usuario = investors[_user];
-
-    if ( !usuario.registered && usuario.gastado.add(_value) > usuario.balance) revert();
-      
-    usuario.balance += _value;
-
-    return true;
-      
-    
+  function updateTimeClaim(uint256 _time)public onlyOwner{
+    TIME_CLAIM = _time;
   }
-  
+
+  function updateMarketV1(address _market)public onlyOwner{
+    MARKET_V1 = IMARKETV1(_market);
+
+  }
+
   function ChangePrincipalToken(address _tokenERC20) public onlyOwner returns (bool){
 
     CSC_Contract = TRC20_Interface(_tokenERC20);

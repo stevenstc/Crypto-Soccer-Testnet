@@ -22,11 +22,11 @@ const TESTNET = true;
 
 if(TESTNET){
     TOKEN = "0x038987095f309d3640F51644430dc6C7C4E2E409"; //token de pruebas
-    SC = "0xfF7009EF7eF85447F6A5b3f835C81ADd60a321C9";// contrato test market
+    SC = "0xE0E7b1e3693dF2e84e203956C54944fb8C230590";//"0xfF7009EF7eF85447F6A5b3f835C81ADd60a321C9";// contrato test market
     SC2 = "0xC4cC639697DBA2802386386279927C5b894Ec7a7";// contrado test fan youtuber
     SC3 = "0xebCC8F716087B6Bd4AF31759B8F7041ebEC5E820";// contrado test Staking
-    SC5 = "0x99dB6D082E5abD682dC8F4791F10FB39Bc334a9c"; // Market V2
-    SC6 = "0xf0218bbd50ddf065b7a43862fd9e27ee1925c050"; // NFT
+    SC5 = "0xB4a9826e53516a54a83FEdC193EDbc16087540F0"; // Market V2
+    SC6 = "0x1E07926bDCca0d9DE24DFbD323ac5927fB56e4C6"; // NFT
     chainId = '0x61';
     API = "https://brutustronstaking.tk/csc-testnet/";
     WALLETPAY = "0x0c4c6519E8B6e4D9c99b09a3Cda475638c930b00";

@@ -345,25 +345,8 @@ export default class Home extends Component {
     .call({ from: this.props.currentAccount });
 
     var balance = investor.balance;
-    var gastado = investor.gastado;
-    var email = investor.correo;
-
-    //console.log(email.length);
-
-
-    if (email === "" || email.length < 100) {
-      email = "Please update your email";
-    }else{
-      email = cryptr.decrypt(investor.correo)
-      
-    }
-
-    balance = new BigNumber(balance);
-    gastado = new BigNumber(gastado);
-    balance = balance.minus(gastado);
-    balance = balance.shiftedBy(-18);
-    balance = balance.decimalPlaces(6)
-    balance = balance.toString();
+  
+    balance = new BigNumber(balance).shiftedBy(-18).toString(10);
 
     //console.log(balance)
 
@@ -373,7 +356,6 @@ export default class Home extends Component {
 
     this.setState({
       balanceMarket: balance,
-      email: email,
       balanceExchange: resultado
     });
   }
@@ -797,7 +779,7 @@ export default class Home extends Component {
                 <div className="col-md-6 col-lg-4">
                   <div className="p-3 p-md-5 feature-block-1 mb-5 mb-lg-0 bg" style={{"background-image": "url('assets/img/03.png')"}}>
                     <div className="text">
-                      <h2 className="h5 text-white">100 WCSC</h2>
+                      <h2 className="h5 text-white">1000 WCSC</h2>
                       <p>Lorem ipsum dolor sit amet consectetur adipisicing elit. Eos repellat autem illum nostrum sit distinctio!</p>
                       <p className="mb-0" onClick={() => this.buyCoins(1000)}><div className="btn btn-primary btn-sm px-4 py-2 rounded-0">Buy</div></p>
                     </div>

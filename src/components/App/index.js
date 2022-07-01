@@ -12,6 +12,8 @@ import cons from "../../cons"
 
 import abiToken from "../../token";
 import abiMarket from "../../market";
+import abiMarketv2 from "../../market-v2";
+
 import abiFan from "../../fan"
 import abiStaking from "../../staking"
 import abiFaucet from "../../faucet"
@@ -106,7 +108,7 @@ class App extends Component {
           addressToken
         );
         var contractMarket = new web3.eth.Contract(
-          abiMarket,
+          abiMarketv2,
           addressMarket
         );
         var contractFan = new web3.eth.Contract(
