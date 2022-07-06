@@ -10,28 +10,6 @@ interface TRC20_Interface {
     function decimals() external view returns(uint);
 }
 
-interface IMARKETV1 {
-  function largoInventario(address _user) external view returns(uint256);
-}
-
-interface ITRC721 {
-
-    function balanceOf(address owner) external view returns (uint256 balance);
-    function ownerOf(uint256 tokenId) external view returns (address owner);
-    function safeTransferFrom(address from, address to, uint256 tokenId) external;
-    function transferFrom(address from, address to, uint256 tokenId) external;
-    function approve(address to, uint256 tokenId) external;
-    function getApproved(uint256 tokenId) external view returns (address operator);
-
-    function setApprovalForAll(address operator, bool _approved) external;
-    function isApprovedForAll(address owner, address operator) external view returns (bool);
-
-    function safeTransferFrom(address from, address to, uint256 tokenId, bytes memory data) external;
-
-    function mintWithTokenURI(address to, uint256 tokenId, string memory tokenURI) external;
-    function totalSupply() external view returns (uint256);
-}
-
 library SafeMath {
 
     function mul(uint a, uint b) internal pure returns (uint) {
@@ -123,86 +101,91 @@ contract Admin is Ownable{
 contract Market_V2 is Admin{
   using SafeMath for uint256;
 
-  address public tokenTRC721 = 0xf0218BBD50DdF065b7A43862FD9e27ee1925c050;
-
-  bool public buyItems = true;
-
-  address[] public WALLETS_PRINT_NFT_CSC = [0x0c4c6519E8B6e4D9c99b09a3Cda475638c930b00,0x000000000000000000000000000000000000dEaD,0x004769eF6aec57EfBF56c24d0A04Fe619fBB6143];
-  uint256[] public PRINT_NFT_CSC = [500 * 10**18,500 * 10**18,500 * 10**18];
  
   address public token = 0xF0fB4a5ACf1B1126A991ee189408b112028D7A63;
   address public adminWallet = 0x004769eF6aec57EfBF56c24d0A04Fe619fBB6143;
 
+  uint256 public MIN_CSC = 500 * 10**18;
+  uint256 public MAX_CSC = 10000 * 10**18;
+  uint256 public FEE_CSC = 100 * 10**18;
+
+  uint256 public TIME_CLAIM = 7 * 86400;
 
   TRC20_Interface CSC_Contract = TRC20_Interface(token);
   TRC20_Interface OTRO_Contract = TRC20_Interface(token);
-  
-  mapping (address => bool) public baneado;
-  mapping (address => string[]) public inventario;
-  mapping (address => string[]) public inGame;
 
-  string[] public items;
-  bool[] public comprable;
-  uint256[] public prices;
+  struct Investor {
+    bool baneado;
+    uint256 balance;
+    uint256 payAt;
+  }
+
+  mapping (address => Investor) public investors;
+
+  uint256 ingresos;
+  uint256 retiros;
 
   constructor() {
 
-
   }
 
-  function migrar( string[] memory _inventario) public {
+  function buyCoins(uint256 _value) public returns(bool){
 
-    inventario[msg.sender] = _inventario;
+    Investor storage usuario = investors[msg.sender];
 
-  }
+    if ( usuario.baneado) revert();
 
-  function buyItem( address _user, uint256 _item) public {
-
-    if(!buyItems || baneado[_user] )revert();
-
-    for (uint256 index = 0; index < WALLETS_PRINT_NFT_CSC.length; index++) {
-      if(!CSC_Contract.transferFrom(msg.sender, WALLETS_PRINT_NFT_CSC[index], PRINT_NFT_CSC[index]))revert();
-    }
-
-      
-  }
-
-
-  function addItem(string memory _nombre) public onlyOwner returns(bool){
-
-    items.push(_nombre);
+    if(!CSC_Contract.transferFrom(msg.sender, address(this), _value))revert();
+    usuario.balance = usuario.balance.add(_value);
+    ingresos = ingresos.add(_value);
 
     return true;
     
   }
 
-  function editItem(uint256 _id, string memory _nombre) public onlyOwner returns(bool){
+  function asignarCoinsTo(uint256 _value, address _user) public onlyAdmin returns(bool){
 
-    items[_id] = _nombre;
+    Investor storage usuario = investors[_user];
+
+    if ( usuario.baneado) revert();
+      
+    usuario.balance += _value;
 
     return true;
+      
     
   }
 
-  function largoInventario(address _user) public view returns(uint256){
+  function sellCoins(uint256 _value) public returns (bool) {
 
-    return inventario[_user].length;
+      if(_value < MIN_CSC)revert();
+      if(_value > MAX_CSC)revert();
+      Investor storage usuario = investors[msg.sender];
+
+      if(block.timestamp > usuario.payAt.add(TIME_CLAIM))revert();
+
+      if (usuario.baneado) revert();
+      if (_value > usuario.balance)revert();
+
+      if (!CSC_Contract.transfer(msg.sender,  _value))revert();
+
+      usuario.balance -= _value;
+      retiros += _value;
+      usuario.payAt = block.timestamp;
+
+      return true;
+  }
+
+function gastarCoinsfrom(uint256 _value, address _user) public onlyAdmin returns(bool){
+
+    Investor storage usuario = investors[_user];
+
+    if ( usuario.baneado || _value > usuario.balance) revert();
       
-  }
+    usuario.balance -= _value;
 
-  function largoItems() public view returns(uint256){
-
-    return items.length;
-      
-  }
-
-  function updateBuyItems(bool _truefalse)public onlyOwner{
-    buyItems = _truefalse;
-  }
-
-  function updateWalletsPrints(address[] memory _wallets, uint256[] memory _valores)public onlyOwner{
-    WALLETS_PRINT_NFT_CSC = _wallets;
-    PRINT_NFT_CSC = _valores;
+    return true;
+    
   }
 
   function updateMinMax(uint256 _min, uint256 _max)public onlyOwner{
@@ -210,7 +193,7 @@ contract Market_V2 is Admin{
     MAX_CSC = _max;
   }
 
-  function updateTimeClaim(uint256 _time)public onlyOwner{
+  function updateTimeToClaim(uint256 _time)public onlyOwner{
     TIME_CLAIM = _time;
   }
 
@@ -231,7 +214,7 @@ contract Market_V2 is Admin{
 
   }
 
-  function redimTokenPrincipal01() public onlyOwner returns (uint256){
+  function redimTokenPrincipal() public onlyOwner returns (uint256){
 
     if ( CSC_Contract.balanceOf(address(this)) <= 0)revert();
 
@@ -263,7 +246,7 @@ contract Market_V2 is Admin{
     return valor;
   }
 
-  function redimETH() public onlyOwner returns (uint256){
+  function redimBNB() public onlyOwner returns (uint256){
 
     if ( address(this).balance <= 0)revert();
 
