@@ -1,4 +1,4 @@
-pragma solidity ^0.5.15;
+pragma solidity ^0.8.0;
 // SPDX-License-Identifier: Apache-2.0 
 
 library SafeMath {
@@ -53,17 +53,13 @@ library SafeMath {
     }
 }
 
-contract Context {
-    constructor () internal { }
-
-    function _msgSender() internal view returns (address payable) {
-        return msg.sender;
-    }
-
-    function _msgData() internal view returns (bytes memory) {
-        this; // silence state mutability warning without generating bytecode - see https://github.com/ethereum/solidity/issues/2691
-        return msg.data;
-    }
+abstract contract Context {
+  function _msgSender() internal view virtual returns (address) {
+    return msg.sender;
+  }
+  function _msgData() internal view virtual returns (bytes calldata) {
+    return msg.data;
+  }
 }
 
 library Roles {
@@ -84,20 +80,6 @@ library Roles {
     function has(Role storage role, address account) internal view returns (bool) {
         require(account != address(0), "Roles: account is the zero address");
         return role.bearer[account];
-    }
-}
-
-library Address {
-    function toPayable(address account) internal pure returns (address payable) {
-        return address(uint160(account));
-    }
-
-    function sendValue(address payable recipient, uint256 amount) internal {
-        require(address(this).balance >= amount, "Address: insufficient balance");
-
-        // solhint-disable-next-line avoid-call-value
-        (bool success, ) = recipient.call.value(amount)("");
-        require(success, "Address: unable to send value, recipient may have reverted");
     }
 }
 
@@ -130,7 +112,7 @@ contract MinterRole is Context {
 
     Roles.Role private _minters;
 
-    constructor () internal {
+    constructor () {
         _addMinter(_msgSender());
     }
 
@@ -166,43 +148,43 @@ interface IBEP165 {
     function supportsInterface(bytes4 interfaceId) external view returns (bool);
 }
 
-
-contract IBEP721 is IBEP165 {
-    event Transfer(address indexed from, address indexed to, uint256 indexed tokenId);
-    event Approval(address indexed owner, address indexed approved, uint256 indexed tokenId);
-    event ApprovalForAll(address indexed owner, address indexed operator, bool approved);
-
-    function balanceOf(address owner) public view returns (uint256 balance);
-    function ownerOf(uint256 tokenId) public view returns (address owner);
-    function safeTransferFrom(address from, address to, uint256 tokenId) public;
-    function transferFrom(address from, address to, uint256 tokenId) public;
-    function approve(address to, uint256 tokenId) public;
-    function getApproved(uint256 tokenId) public view returns (address operator);
-    function setApprovalForAll(address operator, bool _approved) public;
-    function isApprovedForAll(address owner, address operator) public view returns (bool);
-    function safeTransferFrom(address from, address to, uint256 tokenId, bytes memory data) public;
+interface IBEP721 {
+    function balanceOf(address owner) external view returns (uint256 balance);
+    function ownerOf(uint256 tokenId) external view returns (address owner);
+    function safeTransferFrom(address from, address to, uint256 tokenId) external;
+    function transferFrom(address from, address to, uint256 tokenId) external;
+    function approve(address to, uint256 tokenId) external;
+    function getApproved(uint256 tokenId) external view returns (address operator);
+    function setApprovalForAll(address operator, bool _approved) external;
+    function isApprovedForAll(address owner, address operator) external view returns (bool);
+    function safeTransferFrom(address from, address to, uint256 tokenId, bytes memory data) external;
 }
 
 
-contract IBEP721Metadata is IBEP721 {
+interface IBEP721Metadata {
     function name() external view returns (string memory);
     function symbol() external view returns (string memory);
     function tokenURI(uint256 tokenId) external view returns (string memory);
 }
 
-contract IBEP721Receiver {
+interface IBEP721Receiver {
 
-    function onBEP721Received(address operator, address from, uint256 tokenId, bytes memory data)
-    public returns (bytes4);
+    function onBEP721Received(address operator, address from, uint256 tokenId, bytes memory data) external returns (bytes4);
 }
 
-contract BEP165 is IBEP165 {
+interface IBEP721Enumerable is IBEP721 {
+    function totalSupply() external view returns (uint256);
+    function tokenOfOwnerByIndex(address owner, uint256 index) external view returns (uint256 tokenId);
+    function tokenByIndex(uint256 index) external view returns (uint256);
+}
+
+contract BEP165 {
 
     bytes4 private constant _INTERFACE_ID_BEP165 = 0x01ffc9a7;
 
     mapping(bytes4 => bool) private _supportedInterfaces;
 
-    constructor () internal {
+    constructor () {
         _registerInterface(_INTERFACE_ID_BEP165);
     }
 
@@ -218,10 +200,17 @@ contract BEP165 is IBEP165 {
 }
 
 
-contract BEP721 is Context, BEP165, IBEP721 {
+contract BEP721 is Context, BEP165 , MinterRole {
+    event Transfer(address indexed from, address indexed to, uint256 indexed tokenId);
+    event Approval(address indexed owner, address indexed approved, uint256 indexed tokenId);
+    event ApprovalForAll(address indexed owner, address indexed operator, bool approved);
+
     using SafeMath for uint256;
-    using Address for address;
     using Counters for Counters.Counter;
+
+    string public name;
+    string public symbol;
+    string public baseURI;
 
     // Equals to `bytes4(keccak256("onBEP721Received(address,address,uint256,bytes)"))`
     // which can be also obtained as `IBEP721Receiver(0).onBEP721Received.selector`
@@ -257,9 +246,19 @@ contract BEP721 is Context, BEP165, IBEP721 {
      */
     bytes4 private constant _INTERFACE_ID_BEP721 = 0x80ac58cd;
 
-    constructor () public {
-        // register the supported interfaces to conform to BEP721 via BEP165
+    bytes4 private constant _INTERFACE_ID_BEP721_METADATA = 0x5b5e139f;
+
+    bytes4 private constant _INTERFACE_ID_BEP721_ENUMERABLE = 0x780e9d63;
+
+
+    constructor (string memory _name, string memory _symbol, string memory _baseURI) {
+        name = _name;
+        symbol = _symbol;
+        baseURI = _baseURI;
+
         _registerInterface(_INTERFACE_ID_BEP721);
+        _registerInterface(_INTERFACE_ID_BEP721_METADATA);
+        _registerInterface(_INTERFACE_ID_BEP721_ENUMERABLE);
     }
 
     function balanceOf(address owner) public view returns (uint256) {
@@ -352,6 +351,10 @@ contract BEP721 is Context, BEP165, IBEP721 {
         _tokenOwner[tokenId] = to;
         _ownedTokensCount[to].increment();
 
+        _addTokenToOwnerEnumeration(to, tokenId);
+
+        _addTokenToAllTokensEnumeration(tokenId);
+
         emit Transfer(address(0), to, tokenId);
     }
 
@@ -369,6 +372,17 @@ contract BEP721 is Context, BEP165, IBEP721 {
  
     function _burn(uint256 tokenId) internal {
         _burn(ownerOf(tokenId), tokenId);
+
+        _removeTokenFromOwnerEnumeration(ownerOf(tokenId), tokenId);
+        // Since tokenId will be deleted, we can clear its slot in _ownedTokensIndex to trigger a gas refund
+        _ownedTokensIndex[tokenId] = 0;
+
+        _removeTokenFromAllTokensEnumeration(tokenId);
+
+         // Clear metadata (if any)
+        if (bytes(_tokenURIs[tokenId]).length != 0) {
+            delete _tokenURIs[tokenId];
+        }
     }
 
 
@@ -382,6 +396,10 @@ contract BEP721 is Context, BEP165, IBEP721 {
         _ownedTokensCount[to].increment();
 
         _tokenOwner[tokenId] = to;
+
+        _removeTokenFromOwnerEnumeration(from, tokenId);
+
+        _addTokenToOwnerEnumeration(to, tokenId);
 
         emit Transfer(from, to, tokenId);
     }
@@ -430,48 +448,10 @@ contract BEP721 is Context, BEP165, IBEP721 {
             _tokenApprovals[tokenId] = address(0);
         }
     }
-}
-
-
-contract BEP721Metadata is Context, BEP165, BEP721, IBEP721Metadata {
-    // Token name
-    string private _name;
-
-    // Token symbol
-    string private _symbol;
-
-    // Base URI
-    string private _baseURI;
 
     // Optional mapping for token URIs
     mapping(uint256 => string) private _tokenURIs;
 
-    /*
-     *     bytes4(keccak256('name()')) == 0x06fdde03
-     *     bytes4(keccak256('symbol()')) == 0x95d89b41
-     *     bytes4(keccak256('tokenURI(uint256)')) == 0xc87b56dd
-     *
-     *     => 0x06fdde03 ^ 0x95d89b41 ^ 0xc87b56dd == 0x5b5e139f
-     */
-    bytes4 private constant _INTERFACE_ID_BEP721_METADATA = 0x5b5e139f;
-
-
-    constructor (string memory name, string memory symbol, string memory baseURI) public {
-        _name = name;
-        _symbol = symbol;
-        _baseURI = baseURI;
-
-        _registerInterface(_INTERFACE_ID_BEP721_METADATA);
-    }
-
-
-    function name() external view returns (string memory) {
-        return _name;
-    }
-
-    function symbol() external view returns (string memory) {
-        return _symbol;
-    }
 
     function tokenURI(uint256 tokenId) external view returns (string memory) {
         require(_exists(tokenId), "BEP721Metadata: URI query for nonexistent token");
@@ -483,7 +463,7 @@ contract BEP721Metadata is Context, BEP165, BEP721, IBEP721Metadata {
             return "";
         } else {
             // abi.encodePacked is being used to concatenate strings
-            return string(abi.encodePacked(_baseURI, _tokenURI));
+            return string(abi.encodePacked(baseURI, _tokenURI));
         }
     }
 
@@ -492,39 +472,23 @@ contract BEP721Metadata is Context, BEP165, BEP721, IBEP721Metadata {
         _tokenURIs[tokenId] = _tokenURI;
     }
 
-    function _setBaseURI(string memory baseURI) internal {
-        _baseURI = baseURI;
+    function _setBaseURI(string memory _baseURI) internal {
+        baseURI = _baseURI;
     }
 
-    function baseURI() external view returns (string memory) {
-        return _baseURI;
-    }
-
-    function _burn(address owner, uint256 tokenId) internal {
-        super._burn(owner, tokenId);
-
-        // Clear metadata (if any)
-        if (bytes(_tokenURIs[tokenId]).length != 0) {
-            delete _tokenURIs[tokenId];
-        }
-    }
-}
-
-contract BEP721MetadataMintable is BEP721, BEP721Metadata, MinterRole {
-
-    function updateBaseURI(string memory baseURI) public onlyMinter returns(bool){
-        _setBaseURI(baseURI);
+    function updateBaseURI(string memory _baseURI) public onlyMinter returns(bool){
+        _setBaseURI(_baseURI);
         return true;
     }
 
-    function mintWithTokenURI(address to, uint256 tokenId, string memory tokenURI) public onlyMinter returns (bool) {
+    function mintWithTokenURI(address to, uint256 tokenId, string memory _tokenURI) public onlyMinter returns (bool) {
         _mint(to, tokenId);
-        _setTokenURI(tokenId, tokenURI);
+        _setTokenURI(tokenId, _tokenURI);
         return true;
     }
 
-    function updateTokenURI(uint256 tokenId, string memory tokenURI) public onlyMinter returns (bool) {
-        _setTokenURI(tokenId, tokenURI);
+    function updateTokenURI(uint256 tokenId, string memory _tokenURI) public onlyMinter returns (bool) {
+        _setTokenURI(tokenId, _tokenURI);
         return true;
     }
 
@@ -532,10 +496,6 @@ contract BEP721MetadataMintable is BEP721, BEP721Metadata, MinterRole {
         _burn(ownerToken, tokenId);
         return true;
     }
-}
-
-
-contract BEP721Mintable is BEP721, MinterRole {
 
     function mint(address to, uint256 tokenId) public onlyMinter returns (bool) {
         _mint(to, tokenId);
@@ -551,16 +511,7 @@ contract BEP721Mintable is BEP721, MinterRole {
         _safeMint(to, tokenId, _data);
         return true;
     }
-}
 
-
-contract IBEP721Enumerable is IBEP721 {
-    function totalSupply() public view returns (uint256);
-    function tokenOfOwnerByIndex(address owner, uint256 index) public view returns (uint256 tokenId);
-    function tokenByIndex(uint256 index) public view returns (uint256);
-}
-
-contract BEP721Enumerable is Context, BEP165, BEP721, IBEP721Enumerable {
     // Mapping from owner to list of owned token IDs
     mapping(address => uint256[]) private _ownedTokens;
 
@@ -572,24 +523,6 @@ contract BEP721Enumerable is Context, BEP165, BEP721, IBEP721Enumerable {
 
     // Mapping from token id to position in the allTokens array
     mapping(uint256 => uint256) private _allTokensIndex;
-
-    /*
-     *     bytes4(keccak256('totalSupply()')) == 0x18160ddd
-     *     bytes4(keccak256('tokenOfOwnerByIndex(address,uint256)')) == 0x2f745c59
-     *     bytes4(keccak256('tokenByIndex(uint256)')) == 0x4f6ccce7
-     *
-     *     => 0x18160ddd ^ 0x2f745c59 ^ 0x4f6ccce7 == 0x780e9d63
-     */
-    bytes4 private constant _INTERFACE_ID_BEP721_ENUMERABLE = 0x780e9d63;
-
-    /**
-     * @dev Constructor function.
-     */
-    constructor () public {
-        // register the supported interface to conform to BEP721Enumerable via BEP165
-        _registerInterface(_INTERFACE_ID_BEP721_ENUMERABLE);
-    }
-
  
     function tokenOfOwnerByIndex(address owner, uint256 index) public view returns (uint256) {
         require(index < balanceOf(owner), "BEP721Enumerable: owner index out of bounds");
@@ -606,31 +539,7 @@ contract BEP721Enumerable is Context, BEP165, BEP721, IBEP721Enumerable {
         return _allTokens[index];
     }
 
-    function _transferFrom(address from, address to, uint256 tokenId) internal {
-        super._transferFrom(from, to, tokenId);
-
-        _removeTokenFromOwnerEnumeration(from, tokenId);
-
-        _addTokenToOwnerEnumeration(to, tokenId);
-    }
-
-    function _mint(address to, uint256 tokenId) internal {
-        super._mint(to, tokenId);
-
-        _addTokenToOwnerEnumeration(to, tokenId);
-
-        _addTokenToAllTokensEnumeration(tokenId);
-    }
-
-    function _burn(address owner, uint256 tokenId) internal {
-        super._burn(owner, tokenId);
-
-        _removeTokenFromOwnerEnumeration(owner, tokenId);
-        // Since tokenId will be deleted, we can clear its slot in _ownedTokensIndex to trigger a gas refund
-        _ownedTokensIndex[tokenId] = 0;
-
-        _removeTokenFromAllTokensEnumeration(tokenId);
-    }
+    
 
     function _tokensOfOwner(address owner) internal view returns (uint256[] storage) {
         return _ownedTokens[owner];
@@ -649,7 +558,7 @@ contract BEP721Enumerable is Context, BEP165, BEP721, IBEP721Enumerable {
 
     function _removeTokenFromOwnerEnumeration(address from, uint256 tokenId) private {
   
-        uint256 lastTokenIndex = _ownedTokens[from].length.sub(1);
+        uint256 lastTokenIndex = _ownedTokens[from].length-1;
         uint256 tokenIndex = _ownedTokensIndex[tokenId];
 
         if (tokenIndex != lastTokenIndex) {
@@ -659,12 +568,12 @@ contract BEP721Enumerable is Context, BEP165, BEP721, IBEP721Enumerable {
             _ownedTokensIndex[lastTokenId] = tokenIndex; // Update the moved token's index
         }
 
-        _ownedTokens[from].length--;
+        delete _ownedTokens[from][tokenIndex];
     }
 
     function _removeTokenFromAllTokensEnumeration(uint256 tokenId) private {
 
-        uint256 lastTokenIndex = _allTokens.length.sub(1);
+        uint256 lastTokenIndex = _allTokens.length-1;
         uint256 tokenIndex = _allTokensIndex[tokenId];
 
         uint256 lastTokenId = _allTokens[lastTokenIndex];
@@ -672,14 +581,14 @@ contract BEP721Enumerable is Context, BEP165, BEP721, IBEP721Enumerable {
         _allTokens[tokenIndex] = lastTokenId; // Move the last token to the slot of the to-delete token
         _allTokensIndex[lastTokenId] = tokenIndex; // Update the moved token's index
 
-        _allTokens.length--;
+        delete _allTokens[tokenIndex];
         _allTokensIndex[tokenId] = 0;
     }
 }
 
 
-contract BEP721Token is BEP721, BEP721Enumerable, BEP721MetadataMintable {
-    constructor() public BEP721Metadata("CryptoSoccer Game Assets", "CS-GA", "") {
+contract BEP721Token is BEP721 {
+    constructor() BEP721("CryptoSoccer Game Assets", "CS-GA", "") {
 
     }
 }
