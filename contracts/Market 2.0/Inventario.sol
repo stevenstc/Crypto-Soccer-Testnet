@@ -10,28 +10,6 @@ interface TRC20_Interface {
     function decimals() external view returns(uint);
 }
 
-interface IMARKETV1 {
-  function largoInventario(address _user) external view returns(uint256);
-}
-
-interface ITRC721 {
-
-    function balanceOf(address owner) external view returns (uint256 balance);
-    function ownerOf(uint256 tokenId) external view returns (address owner);
-    function safeTransferFrom(address from, address to, uint256 tokenId) external;
-    function transferFrom(address from, address to, uint256 tokenId) external;
-    function approve(address to, uint256 tokenId) external;
-    function getApproved(uint256 tokenId) external view returns (address operator);
-
-    function setApprovalForAll(address operator, bool _approved) external;
-    function isApprovedForAll(address owner, address operator) external view returns (bool);
-
-    function safeTransferFrom(address from, address to, uint256 tokenId, bytes memory data) external;
-
-    function mintWithTokenURI(address to, uint256 tokenId, string memory tokenURI) external;
-    function totalSupply() external view returns (uint256);
-}
-
 library SafeMath {
 
   function mul(uint a, uint b) internal pure returns (uint) {
@@ -122,6 +100,7 @@ contract Admin is Ownable{
 contract Inventario is Admin{
   using SafeMath for uint256;
 
+  bool public migracion = true;
   bool public buyItems = true;
   bool public sellItems = true;
 
@@ -137,6 +116,7 @@ contract Inventario is Admin{
   mapping (address => bool) public baneado;
   mapping (address => uint256[]) public almacen;
   mapping (address => uint256[]) public market;
+  mapping (address => address[]) public market_token;
   mapping (address => uint256[]) public market_price;
 
 
@@ -157,6 +137,7 @@ contract Inventario is Admin{
 
   function migrar( uint256[] memory _inventario) public {
 
+    if(!migracion)revert();
     almacen[msg.sender] = _inventario;
 
   }
@@ -165,11 +146,13 @@ contract Inventario is Admin{
 
     if(!buyItems || baneado[msg.sender] || !comprable[_item] )revert();
 
+     TRC20_Interface token_Contract = TRC20_Interface(token);
+
     for (uint256 index = 0; index < WALLETS_FEE.length; index++) {
-      if(!CSC_Contract.transferFrom(msg.sender, WALLETS_FEE[index], FEE_CSC[index]))revert();
+      if(!token_Contract.transferFrom(msg.sender, WALLETS_FEE[index], FEE_CSC[index]))revert();
     }
 
-    if(!CSC_Contract.transferFrom(msg.sender, address(this), precio[_item]))revert();
+    if(!token_Contract.transferFrom(msg.sender, address(this), precio[_item]))revert();
 
     almacen[msg.sender].push(_item);
       
@@ -177,24 +160,27 @@ contract Inventario is Admin{
 
   function buyItemFromMarket( address _user, uint256 _item) public {
 
-    if(!sellItems || baneado[_user] || baneado[msg.sender] )revert();
+    if(!sellItems || baneado[_user] || baneado[msg.sender] || baneado[market_token[_user][_item]])revert();
+
+     TRC20_Interface token_Contract = TRC20_Interface(market_token[_user][_item]);
 
     for (uint256 index = 0; index < WALLETS_FEE.length; index++) {
       if(!CSC_Contract.transferFrom(msg.sender, WALLETS_FEE[index], FEE_CSC[index]))revert();
     }
 
     if(_user != msg.sender){
-      if(!CSC_Contract.transferFrom(msg.sender, _user, market_price[_user][_item]))revert();
+      if(!token_Contract.transferFrom(msg.sender, _user, market_price[_user][_item]))revert();
 
     }
 
     delete market[_user][_item];
     delete market_price[_user][_item];
+    delete market_token[_user][_item];
     almacen[msg.sender].push(_item);
       
   }
 
-  function SellItemFromMarket( address _user, uint256 _item, uint256 _price) public {
+  function SellItemFromMarket( address _user, uint256 _item,address _token, uint256 _price) public {
 
     if(!sellItems || baneado[_user] || baneado[msg.sender] )revert();
 
@@ -205,42 +191,68 @@ contract Inventario is Admin{
     delete almacen[msg.sender][_item];
     market[msg.sender].push(_item);
     market_price[msg.sender].push(_price);
+    market_token[msg.sender].push(_token);
       
   }
 
-  function addItem(string memory _nombre) public onlyOwner returns(bool){
+   function addItemToMarket( address _user, uint256 _item) public onlyAdmin{
+
+    if( baneado[_user] )revert();
+
+    almacen[_user].push(_item);
+      
+  }
+
+  function SubItemfromMarket( address _user, uint256 _item) public {
+
+    if( baneado[_user] )revert();
+    delete almacen[_user][_item];
+      
+  }
+
+  function addItem(string memory _nombre, bool _comprable, bool _imprimible, uint256 _precio) public onlyOwner returns(bool){
 
     items.push(_nombre);
+    comprable.push(_comprable);
+    imprimible.push(_imprimible);
+    precio.push(_precio);
 
     return true;
     
   }
 
-  function editItem(uint256 _id, string memory _nombre) public onlyOwner returns(bool){
+  function editItem(uint256 _id, string memory _nombre, bool _comprable, bool _imprimible, uint256 _precio) public onlyOwner returns(bool){
 
     items[_id] = _nombre;
+    comprable[_id] = _comprable;
+    imprimible[_id] = _imprimible;
+    precio[_id] = _precio;
 
     return true;
     
+  }
+
+  function verInventario(address _user) public view returns(uint256 [] memory){
+    return almacen[_user];
+  }
+
+  function verMarket(address _user) public view returns(uint256 [] memory _items, uint256 [] memory _price){
+    return (market[_user],market_price[_user]);
   }
 
   function largoInventario(address _user) public view returns(uint256){
-
     return almacen[_user].length;
-      
   }
 
   function largoItems() public view returns(uint256){
-
     return items.length;
-      
   }
 
   function updateBuyItems(bool _truefalse)public onlyOwner{
     buyItems = _truefalse;
   }
 
-  function updateWalletsPrints(address[] memory _wallets, uint256[] memory _valores)public onlyOwner{
+  function updateWalletsFee(address[] memory _wallets, uint256[] memory _valores)public onlyOwner{
     WALLETS_FEE = _wallets;
     FEE_CSC = _valores;
   }

@@ -13,6 +13,7 @@ import cons from "../../cons"
 import abiToken from "../../token";
 import abiMarket from "../../market";
 import abiMarketv2 from "../../market-v2";
+import abiInventario from "../../inventario";
 
 import abiFan from "../../fan"
 import abiStaking from "../../staking"
@@ -122,7 +123,12 @@ class App extends Component {
         var contractFaucet = new web3.eth.Contract(
           abiFaucet,
           addressFaucet
+        );
+        var contractInventario = new web3.eth.Contract(
+          abiInventario,
+          cons.SC5
         )
+        
   
         this.setState({
           binanceM:{
@@ -131,7 +137,8 @@ class App extends Component {
             contractMarket: contractMarket,
             contractFan: contractFan,
             contractStaking: contractStaking,
-            contractFaucet: contractFaucet
+            contractFaucet: contractFaucet,
+            contractInventario: contractInventario
           }
         })
   

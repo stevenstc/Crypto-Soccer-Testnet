@@ -84,8 +84,8 @@ export default class Market extends Component {
 
     if(aprovado > 0){
 
-        var result = await this.props.wallet.contractMarket.methods
-          .buyItem(id)
+        var result = await this.props.wallet.contractInventario.methods
+          .buyItemsGame(id)
           .send({ from: this.props.currentAccount });
 
         if(result){

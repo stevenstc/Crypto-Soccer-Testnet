@@ -101,7 +101,6 @@ contract Admin is Ownable{
 contract Market_V2 is Admin{
   using SafeMath for uint256;
 
- 
   address public token = 0xF0fB4a5ACf1B1126A991ee189408b112028D7A63;
   address public adminWallet = 0x004769eF6aec57EfBF56c24d0A04Fe619fBB6143;
 
