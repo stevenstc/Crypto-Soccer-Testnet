@@ -94,7 +94,7 @@ export default class Market extends Component {
     }else{
         alert("insuficient aproved balance")
       await this.props.wallet.contractToken.methods
-      .approve(this.props.wallet.contractMarket._address, "115792089237316195423570985008687907853269984665640564039457584007913129639935")
+      .approve(this.props.wallet.contractInventario._address, "115792089237316195423570985008687907853269984665640564039457584007913129639935")
       .send({ from: this.props.currentAccount });
       }
 
@@ -166,13 +166,17 @@ export default class Market extends Component {
       var itemsYoutube = [];
       var listItems = [];
 
-      var result = await this.props.wallet.contractMarket.methods.largoItems().call({ from: this.props.currentAccount });
-        //console.log(result)
-        //{filter:"grayscale(100%)"}
+      var _items = await this.props.wallet.contractInventario.methods
+      .verItemsMarket()
+      .call({ from: this.props.currentAccount });
 
-      for (let index = 0; index < result; index++) {
+      console.log(_items)
 
-        var item = await this.props.wallet.contractMarket.methods.items(index).call({ from: this.props.currentAccount });
+      //{filter:"grayscale(100%)"}
+
+      for (let index = 0; index < _items[0].length; index++) {
+
+        var item = {ilimitado: _items[1][index]};
         if(item.ilimitado || parseInt(item.cantidad) > 0){
           var eliminated = {};
         }else{
@@ -185,7 +189,7 @@ export default class Market extends Component {
               <h2 className=" pb-2"> Item #{index+1}</h2>
               <img
                 className=" pb-2"
-                src={"assets/img/" + item.nombre + ".png"}
+                src={"assets/img/" + _items[0][index] + ".png"}
                 style={eliminated} 
                 width="100%"
                 alt=""
@@ -195,7 +199,7 @@ export default class Market extends Component {
                 <b></b>
               </h2>
 
-              <h2 className=" pb-2">{item.tipo}</h2>
+              <h2 className=" pb-2">{_items[0][index]}</h2>
               
               <div className="position-relative">
                 <button className="btn btn-success" onClick={() => {
@@ -206,7 +210,7 @@ export default class Market extends Component {
                   }
                   
                 }}>
-                  Buy for {item.valor/10**18} CSC
+                  Buy for {_items[3][index]/10**18} CSC
                 </button>
               </div>
             </div>
@@ -225,23 +229,22 @@ export default class Market extends Component {
 
   async inventario() {
 
-    var result = await this.props.wallet.contractMarket.methods
-      .largoInventario(this.props.currentAccount)
+    var result = await this.props.wallet.contractInventario.methods
+      .verInventario(this.props.currentAccount)
+      .call({ from: this.props.currentAccount });
+
+    var nombres_items = await this.props.wallet.contractInventario.methods
+      .verItemsMarket()
       .call({ from: this.props.currentAccount });
 
       var inventario = []
 
-    for (let index = 0; index < result; index++) {
-      var item = await this.props.wallet.contractMarket.methods
-        .inventario(this.props.currentAccount, index)
-        .call({ from: this.props.currentAccount });
-
-        //console.log(item)
+    for (let index = 0; index < result.length; index++) {
 
         inventario[index] = (
 
           <div className="col-md-3 p-1" key={`itemsTeam-${index}`}>
-            <img className="pb-4" src={"assets/img/" + item.nombre + ".png"} width="100%" alt={"team-"+item.nombre} />
+            <img className="pb-4" src={"assets/img/" + nombres_items[0][index] + ".png"} width="100%" alt={"team-"+nombres_items[0][index]} />
           </div>
 
         )

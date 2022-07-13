@@ -4,7 +4,6 @@ import Web3 from "web3";
 
 import Home from "../V1Home";
 import Market from "../Market";
-import MarketV2 from "../MarketV2";
 import Fan from "../HomeFan";
 import Staking from "../HomeStaking"
 import TronLinkGuide from "../TronLinkGuide";
@@ -183,8 +182,6 @@ class App extends Component {
             return(<Staking wallet={this.state.binanceM} currentAccount={this.state.currentAccount}/>);
           case "market":
             return(<Market wallet={this.state.binanceM} currentAccount={this.state.currentAccount}/>);
-          case "marketv2":
-            return(<MarketV2 wallet={this.state.binanceM} currentAccount={this.state.currentAccount}/>);
           default:
             return(<Home wallet={this.state.binanceM} currentAccount={this.state.currentAccount}/>);
         }

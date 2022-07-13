@@ -130,14 +130,14 @@ contract Inventario is Admin{
 
     items = ["t1-brazil-legendario","t2-argentina-legendario","t3-alemania-legendario","t4-japon-epico","t5-colombia-epico","t6-mexico-epico","t7-croacia-epico","t8-EU-epico","t9-portugal-epico","t10-esp-epico","t11-argentina-comun","t12-australia-comun","t13-belgium-comun","t14-brazil-comun","t15-canda-comun","t16-colombia-comun","t17-costaRica-comun","t18-croatia-comun","t19-denmark-comun","t20-england-comun","t21-germany-comun","t22-holland-comun","t23-iceland-comun","t24-iran-comun","t25-italy-comun","t26-ivoryCoast-comun","t27-japan-comun","t28-koreaRepublic-comun","t29-mexico-comun","t30-panama-comun","t31-peru-comun","t32-poland-comun","t33-portugal-comun","t34-russia-comun","t35-senegal-comun","t36-serbia-comun","t37-spain-comun","t38-sweden-comun","t39-switzerland-comun","t40-tunisia-comun","t41-unitedStates-comun","t42-uruguay-comun","t43-venezuela-comun","f1-formacion","f2-formacion","f3-formacion","f4-formacion"];
     comprable = [false, false, false, false, false, false, false, false, false, false, true, true, true, true, true, true, true, true, true, true, true, true, true, true, true, true, true, true, true, true, true, true, true, true, true, true, true, true, true, true, true, true, true, true, true, true, true];
-    imprimible = [true, true, true, true, true, true, true, true, true, true, true, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false];
+    imprimible = [true, true, true, true, true, true, true, true, true, true, true, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false];
     precio = [100000000* 10**18,100000000* 10**18,100000000* 10**18,10000000* 10**18,10000000* 10**18,10000000* 10**18,10000000* 10**18,10000000* 10**18,10000000* 10**18,10000000* 10**18,5000* 10**18,5000* 10**18,5000* 10**18,5000* 10**18,5000* 10**18,5000* 10**18,5000* 10**18,5000* 10**18,5000* 10**18,5000* 10**18,5000* 10**18,5000* 10**18,5000* 10**18,5000* 10**18,5000* 10**18,5000* 10**18,5000* 10**18,5000* 10**18,5000* 10**18,5000* 10**18,5000* 10**18,5000* 10**18,5000* 10**18,5000* 10**18,5000* 10**18,5000* 10**18,5000* 10**18,5000* 10**18,5000* 10**18,5000* 10**18,5000* 10**18,5000* 10**18,5000* 10**18,5000* 10**18,2000* 10**18,2000* 10**18,2000* 10**18];
 
   }
 
   function migrar( uint256[] memory _inventario) public {
 
-    if(!migracion)revert();
+    if(!migracion || almacen[msg.sender].length > 0)revert();
     almacen[msg.sender] = _inventario;
 
   }
@@ -230,6 +230,10 @@ contract Inventario is Admin{
 
     return true;
     
+  }
+
+  function verItemsMarket() public view returns(string[] memory, bool[] memory, bool[] memory, uint256[] memory){
+    return (items,comprable,imprimible,precio);
   }
 
   function verInventario(address _user) public view returns(uint256 [] memory){
