@@ -44,7 +44,7 @@ export default class Market extends Component {
         .balanceOf(this.props.currentAccount)
         .call({ from: this.props.currentAccount });
 
-    balance = new BigNumber(balance).shiftedBy(-18).toNumber(10);
+    balance = new BigNumber(balance).shiftedBy(-18).toString(10);
 
     //console.log(balance)
 
@@ -181,7 +181,7 @@ export default class Market extends Component {
         //console.log(item)
         itemsYoutube[index] = (
             <div className="col-lg-3 col-md-6 p-3 mb-5 text-center monedas position-relative border" key={`items-${index}`}>
-              <h2 className=" pb-2"> {((_items[0][index]).replace("-"," ")).replace("-"," ")}</h2>
+              <h2 className=" pb-2"> {(_items[0][index]).replace(/-/g," ").replace("comun", "common").replace("formacion","formation").replace("epico","epic").replace("legendario","legendary")}</h2>
               <img
                 className=" pb-2"
                 src={"assets/img/" + _items[0][index] + ".png"}
@@ -203,7 +203,7 @@ export default class Market extends Component {
                   }
                   
                 }}>
-                  Buy for {new BigNumber(_items[3][index]).shiftedBy(-18).decimalPlaces(2).toNumber(10)} CSC
+                  Buy for {new BigNumber(_items[3][index]).shiftedBy(-18).toString(10)} CSC
                 </button>
               </div>
             </div>

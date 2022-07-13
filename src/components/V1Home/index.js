@@ -224,6 +224,7 @@ export default class Home extends Component {
     this.balanceInMarket = this.balanceInMarket.bind(this);
     this.balanceInGame = this.balanceInGame.bind(this);
     this.inventario = this.inventario.bind(this);
+    this.inventarioV2 = this.inventarioV2.bind(this);
     this.updateEmail = this.updateEmail.bind(this);
     this.update = this.update.bind(this);
 
@@ -244,6 +245,8 @@ export default class Home extends Component {
     this.balance();
     this.balanceInMarket();
     this.inventario();
+    this.inventarioV2();
+
     
   }
 
@@ -474,8 +477,6 @@ export default class Home extends Component {
     
   }
 
- 
-
   async inventario() {
 
     var result = await this.props.wallet.contractInventario.methods
@@ -495,10 +496,45 @@ export default class Home extends Component {
 
           <div className="col-md-3 p-1" key={`itemsTeam-${index}`}>
             <img className="pb-4" src={"assets/img/" + nombres_items[0][result[index]] + ".png"} width="100%" alt={"team-"+nombres_items[0][result[index]]} />
+            <button className="btn btn-danger" onClick={()=>{alert("common not sell")}}>Sell item</button>
           </div>
 
         )
     }
+
+    this.setState({
+      inventario: inventario
+    })
+  }
+
+  async inventarioV2() {
+
+    var result = await this.props.wallet.contractInventario.methods
+    .verMarket(this.props.currentAccount)
+    .call({ from: this.props.currentAccount });
+
+    var nombres_items = await this.props.wallet.contractInventario.methods
+    .verItemsMarket()
+    .call({ from: this.props.currentAccount });
+
+
+    var inventario = []
+
+    for (let index = 0; index < result.length; index++) {
+
+        inventario[index] = (
+
+          <div className="col-md-3 p-1" key={`itemsTeam-${index}`}>
+            <img className="pb-4" src={"assets/img/" + nombres_items[0][result[index]] + ".png"} width="100%" alt={"team-"+nombres_items[0][result[index]]} />
+            <button className="btn btn-warning">Back inventory</button>
+          </div>
+
+        )
+    }
+
+    this.setState({
+      inventarioV2: inventario
+    })
   }
 
   render() {
@@ -1223,7 +1259,7 @@ this.update();
           
           <div style={{ marginTop: "30px" }} className="row text-center">
             <div className="col-md-12">
-              <h3>Inventory V1</h3>{" "}
+              <h3>Inventory</h3>{" "}
               
             </div>
           </div>
@@ -1238,13 +1274,13 @@ this.update();
 
           <div style={{ marginTop: "30px" }} className="row text-center">
             <div className="col-md-12">
-              <h3>Inventory V2</h3>{" "}
+              <h3>Market for sell</h3>{" "}
               
             </div>
           </div>
 
           <div className="row text-center" id="inventory">
-            {this.state.inventario}
+            {this.state.inventarioV2}
           </div>
 
         </div>
