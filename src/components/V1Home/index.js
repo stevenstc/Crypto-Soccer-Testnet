@@ -1223,7 +1223,7 @@ this.update();
           
           <div style={{ marginTop: "30px" }} className="row text-center">
             <div className="col-md-12">
-              <h3>IN GAME inventory</h3>{" "}
+              <h3>Inventory V1</h3>{" "}
               
             </div>
           </div>
@@ -1238,7 +1238,7 @@ this.update();
 
           <div style={{ marginTop: "30px" }} className="row text-center">
             <div className="col-md-12">
-              <h3>Account inventory</h3>{" "}
+              <h3>Inventory V2</h3>{" "}
               
             </div>
           </div>

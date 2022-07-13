@@ -44,10 +44,7 @@ export default class Market extends Component {
         .balanceOf(this.props.currentAccount)
         .call({ from: this.props.currentAccount });
 
-    balance = new BigNumber(balance);
-    balance = balance.shiftedBy(-18);
-    balance = balance.decimalPlaces(6)
-    balance = balance.toString();
+    balance = new BigNumber(balance).shiftedBy(-18).toNumber(10);
 
     //console.log(balance)
 
@@ -59,15 +56,13 @@ export default class Market extends Component {
 
   async buyItem(id){
 
-    console.log("ento a comprar un bendito item")
+    console.log("ento a comprar un item")
 
     var aprovado = await this.props.wallet.contractToken.methods
-      .allowance(this.props.currentAccount, this.props.wallet.contractMarket._address)
+      .allowance(this.props.currentAccount, this.props.wallet.contractInventario._address)
       .call({ from: this.props.currentAccount });
 
-    aprovado = new BigNumber(aprovado);
-    aprovado = aprovado.shiftedBy(-18);
-    aprovado = aprovado.decimalPlaces(2).toNumber();
+    aprovado = new BigNumber(aprovado).shiftedBy(-18).decimalPlaces(2).toNumber(10);
 
     /*
 
@@ -186,7 +181,7 @@ export default class Market extends Component {
         //console.log(item)
         itemsYoutube[index] = (
             <div className="col-lg-3 col-md-6 p-3 mb-5 text-center monedas position-relative border" key={`items-${index}`}>
-              <h2 className=" pb-2"> Item #{index+1}</h2>
+              <h2 className=" pb-2"> {((_items[0][index]).replace("-"," ")).replace("-"," ")}</h2>
               <img
                 className=" pb-2"
                 src={"assets/img/" + _items[0][index] + ".png"}
@@ -198,8 +193,6 @@ export default class Market extends Component {
               <h2 className="centradoFan">
                 <b></b>
               </h2>
-
-              <h2 className=" pb-2">{_items[0][index]}</h2>
               
               <div className="position-relative">
                 <button className="btn btn-success" onClick={() => {
@@ -210,7 +203,7 @@ export default class Market extends Component {
                   }
                   
                 }}>
-                  Buy for {_items[3][index]/10**18} CSC
+                  Buy for {new BigNumber(_items[3][index]).shiftedBy(-18).decimalPlaces(2).toNumber(10)} CSC
                 </button>
               </div>
             </div>
