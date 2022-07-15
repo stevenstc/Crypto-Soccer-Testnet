@@ -22,10 +22,10 @@ const TESTNET = true;
 
 if(TESTNET){
     TOKEN = "0x038987095f309d3640F51644430dc6C7C4E2E409"; //token de pruebas
-    SC = "0xE0E7b1e3693dF2e84e203956C54944fb8C230590";//"0xfF7009EF7eF85447F6A5b3f835C81ADd60a321C9";// contrato test market
+    SC = "0xCB553b2128fAb586E8C6601983cdb134eaBdd989";//"0xfF7009EF7eF85447F6A5b3f835C81ADd60a321C9";// contrato test market
     SC2 = "0xC4cC639697DBA2802386386279927C5b894Ec7a7";// contrado test fan youtuber
     SC3 = "0xebCC8F716087B6Bd4AF31759B8F7041ebEC5E820";// contrado test Staking
-    SC5 = "0xA53a2b09cf92AA418d1fAa2467Ed8EAa1A1F1761"; // Inventario
+    SC5 = "0x875568aAd256AB48E8bDc7bCb72C302E78e2C78E"; // Inventario
     SC6 = "0x1E07926bDCca0d9DE24DFbD323ac5927fB56e4C6"; // Exchange
     chainId = '0x61';
     API = "https://brutustronstaking.tk/csc-testnet/";

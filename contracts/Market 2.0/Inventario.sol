@@ -113,6 +113,7 @@ contract Inventario is Admin{
   TRC20_Interface CSC_Contract = TRC20_Interface(token);
   TRC20_Interface OTRO_Contract = TRC20_Interface(token);
   
+  mapping (address => bool) public migrado;
   mapping (address => bool) public baneado;
   mapping (address => uint256[]) public almacen;
   mapping (address => uint256[]) public market;
@@ -137,8 +138,9 @@ contract Inventario is Admin{
 
   function migrar( uint256[] memory _inventario) public {
 
-    if(!migracion || almacen[msg.sender].length > 0 || baneado[msg.sender])revert();
+    if(!migracion || almacen[msg.sender].length > 0 || baneado[msg.sender] || migrado[msg.sender])revert();
     almacen[msg.sender] = _inventario;
+    migrado[msg.sender] = true;
 
   }
 

@@ -488,18 +488,63 @@ export default class Home extends Component {
     .call({ from: this.props.currentAccount });
 
 
-    var inventario = []
+    if(result.length > 0){
 
-    for (let index = 0; index < result.length; index++) {
+      var inventario = []
 
-        inventario[index] = (
+      for (let index = 0; index < result.length; index++) {
 
-          <div className="col-md-3 p-1" key={`itemsTeam-${index}`}>
-            <img className="pb-4" src={"assets/img/" + nombres_items[0][result[index]] + ".png"} width="100%" alt={"team-"+nombres_items[0][result[index]]} />
-            <button className="btn btn-danger" onClick={()=>{alert("common not sell")}}>Sell item</button>
-          </div>
+          inventario[index] = (
 
+            <div className="col-md-3 p-1" key={`itemsTeam-${index}`}>
+              <img className="pb-4" src={"assets/img/" + nombres_items[0][result[index]] + ".png"} width="100%" alt={"team-"+nombres_items[0][result[index]]} />
+              <button className="btn btn-danger" onClick={()=>{alert("common not sell")}}>Sell item</button>
+            </div>
+
+          )
+      }
+
+    }else{
+
+      var largoInventario = await this.props.wallet.contractMarket.methods
+      .largoInventario(this.props.currentAccount)
+      .call({ from: this.props.currentAccount });
+
+      var migrado = await this.props.wallet.contractInventario.methods
+      .migrado(this.props.currentAccount)
+      .call({ from: this.props.currentAccount });
+
+      console.log(largoInventario)
+
+      if(largoInventario > 0 && !migrado){
+        console.log("entro")
+
+        var old_inventario = [];
+
+        for (let index = 0; index < largoInventario; index++) {
+          const temp = await this.props.wallet.contractMarket.methods
+          .inventario(this.props.currentAccount,index)
+          .call({ from: this.props.currentAccount });
+
+          if(nombres_items[0].indexOf(temp.nombre) != -1){
+            old_inventario[index] = nombres_items[0].indexOf(temp.nombre);  
+
+          }
+
+        }
+
+        console.log(old_inventario);
+
+        inventario = (
+          <><button className="btn btn-warning" onClick={()=>{
+            this.props.wallet.contractInventario.methods
+            .migrar([0,1,2,3,4,5])
+            .send({ from: this.props.currentAccount });
+        }}>Migrate teams to V2</button>
+          </>
         )
+      }
+     
     }
 
     this.setState({
