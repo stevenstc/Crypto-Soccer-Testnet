@@ -825,7 +825,7 @@ export default class Home extends Component {
 
         <div className="container mt-3 mb-3">
           <div className="row text-center">
-            <div className="col-lg-4 col-md-4 ">
+            <div className="col-lg-6 col-md-6 ">
               <h2>Wallet conected</h2>
               <p>{this.props.currentAccount}</p>
               <p>
@@ -865,22 +865,7 @@ export default class Home extends Component {
               </button>
             </div>
 
-            <div className="col-lg-4 col-md-4 ">
-
-            <h2>Email Registred on Market</h2>
-                {this.state.email}
-              <br /><br />
-              <button
-                className="btn btn-secondary"
-                onClick={() => this.updateEmail()}
-              >
-                <i className="fas fa-envelope-open-text"></i> Update Email
-              </button>
-
-             
-            </div>
-
-            <div className="col-lg-4 col-md-4">
+            <div className="col-lg-6 col-md-6">
 
             <h2>GAME data</h2>
 

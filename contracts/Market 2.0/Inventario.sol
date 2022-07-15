@@ -137,7 +137,7 @@ contract Inventario is Admin{
 
   function migrar( uint256[] memory _inventario) public {
 
-    if(!migracion || almacen[msg.sender].length > 0)revert();
+    if(!migracion || almacen[msg.sender].length > 0 || baneado[msg.sender])revert();
     almacen[msg.sender] = _inventario;
 
   }
@@ -173,25 +173,33 @@ contract Inventario is Admin{
 
     }
 
-    delete market[_user][_item];
-    delete market_price[_user][_item];
-    delete market_token[_user][_item];
     almacen[msg.sender].push(_item);
+
+    market[_user][_item] = market[_user][market[_user].length - 1];
+    market[_user].pop();
+    market_price[_user][_item] = market_price[_user][market_price[_user].length - 1];
+    market_price[_user].pop();
+    market_token[_user][_item] = market_token[_user][market_token[_user].length - 1];
+    market_token[_user].pop();
+    
       
   }
 
-  function SellItemFromMarket( address _user, uint256 _item,address _token, uint256 _price) public {
+  function SellItemFromMarket( uint256 _item,address _token, uint256 _price) public {
 
-    if(!sellItems || baneado[_user] || baneado[msg.sender] )revert();
+    if(!sellItems || baneado[msg.sender] )revert();
 
     for (uint256 index = 0; index < WALLETS_FEE.length; index++) {
       if(!CSC_Contract.transferFrom(msg.sender, WALLETS_FEE[index], FEE_CSC[index]))revert();
     }
 
-    delete almacen[msg.sender][_item];
     market[msg.sender].push(_item);
     market_price[msg.sender].push(_price);
     market_token[msg.sender].push(_token);
+
+    almacen[msg.sender][_item] = almacen[msg.sender][almacen[msg.sender].length - 1];
+    almacen[msg.sender].pop();
+    
       
   }
 
@@ -206,7 +214,8 @@ contract Inventario is Admin{
   function SubItemfromMarket( address _user, uint256 _item) public {
 
     if( baneado[_user] )revert();
-    delete almacen[_user][_item];
+    almacen[_user][_item] = almacen[_user][almacen[_user].length - 1];
+    almacen[_user].pop();
       
   }
 
@@ -240,8 +249,8 @@ contract Inventario is Admin{
     return almacen[_user];
   }
 
-  function verMarket(address _user) public view returns(uint256 [] memory _items, uint256 [] memory _price){
-    return (market[_user],market_price[_user]);
+  function verMarket(address _user) public view returns(uint256 [] memory _items, uint256 [] memory _price, address[] memory _token){
+    return (market[_user],market_price[_user],market_token[_user]);
   }
 
   function largoInventario(address _user) public view returns(uint256){
