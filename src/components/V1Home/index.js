@@ -1,9 +1,6 @@
 import React, { Component } from "react";
 import cons from "../../cons"
 const BigNumber = require('bignumber.js');
-const Cryptr = require('cryptr');
-
-const cryptr = new Cryptr(cons.SCK);
 
 export default class Home extends Component {
   constructor(props) {
@@ -267,11 +264,6 @@ export default class Home extends Component {
   async updateEmail() {
     var email = "example@gmail.com";
     email = await window.prompt("enter your email", "example@gmail.com");
-    
-    var investor = await this.props.wallet.contractMarket.methods
-        .investors(this.props.currentAccount)
-        .call({ from: this.props.currentAccount });
-
 
     var disponible = await fetch(cons.API+"api/v1/email/disponible/?email="+email);
     disponible = await disponible.text();
@@ -282,21 +274,10 @@ export default class Home extends Component {
     }
 
     if(window.confirm("is correct?: "+email)){
-      const encryptedString = cryptr.encrypt(email);
-      if (investor.registered) {
-        await this.props.wallet.contractMarket.methods
-          .updateRegistro(encryptedString)
-          .send({ from: this.props.currentAccount });
-      }else{
-        await this.props.wallet.contractMarket.methods
-          .registro(encryptedString)
-          .send({ from: this.props.currentAccount });
-      }
-
+ 
       this.setState({
         email: email
       })
-
       
       var datos = {};
       
@@ -340,7 +321,7 @@ export default class Home extends Component {
   }
 
   async balanceInMarket() {
-    var investor = await this.props.wallet.contractMarket.methods
+    var investor = await this.props.wallet.contractExchange.methods
     .investors(this.props.currentAccount)
     .call({ from: this.props.currentAccount });
 
@@ -350,7 +331,7 @@ export default class Home extends Component {
 
     //console.log(balance)
 
-    var resultado = await fetch(cons.API+"api/v1/consultar/csc/cuenta/"+this.props.wallet.contractMarket._address)
+    var resultado = await fetch(cons.API+"api/v1/consultar/csc/cuenta/"+this.props.wallet.contractExchange._address)
     resultado = await resultado.text()
     resultado = parseFloat(resultado)
 
@@ -424,7 +405,7 @@ export default class Home extends Component {
   async buyCoins(amount){
 
     var aprovado = await this.props.wallet.contractToken.methods
-      .allowance(this.props.currentAccount, this.props.wallet.contractMarket._address)
+      .allowance(this.props.currentAccount, this.props.wallet.contractExchange._address)
       .call({ from: this.props.currentAccount });
 
     aprovado = new BigNumber(aprovado).shiftedBy(-18).decimalPlaces(2).toNumber();
@@ -442,7 +423,7 @@ export default class Home extends Component {
 
       if (balance>=amount) {
 
-        var result = await this.props.wallet.contractMarket.methods
+        var result = await this.props.wallet.contractExchange.methods
         .buyCoins(compra)
         .send({ from: this.props.currentAccount });
   
@@ -457,7 +438,7 @@ export default class Home extends Component {
     }else{
       alert("insuficient aproved balance")
       await this.props.wallet.contractToken.methods
-      .approve(this.props.wallet.contractMarket._address, "115792089237316195423570985008687907853269984665640564039457584007913129639935")
+      .approve(this.props.wallet.contractExchange._address, "115792089237316195423570985008687907853269984665640564039457584007913129639935")
       .send({ from: this.props.currentAccount });
 
     }
@@ -545,9 +526,9 @@ export default class Home extends Component {
         }
 
         inventario = (
-          <><button className="btn btn-warning" onClick={()=>{
+          <><button className="btn btn-warning" onClick={async()=>{
             if(old_inventario.length > 0){
-              this.props.wallet.contractInventario.methods
+              await this.props.wallet.contractInventario.methods
               .migrar(old_inventario)
               .send({ from: this.props.currentAccount });
 
@@ -992,47 +973,47 @@ export default class Home extends Component {
               var tx = {};
               tx.status = false;
 
-datos.username = await prompt("please set a NEW username for the game:")
-  var disponible = await fetch(cons.API+"api/v1/username/disponible/?username="+datos.username);
-  disponible = await disponible.text();
+              datos.username = await prompt("please set a NEW username for the game:")
+                var disponible = await fetch(cons.API+"api/v1/username/disponible/?username="+datos.username);
+                disponible = await disponible.text();
 
-  if( disponible === "false"){
-    alert("username not available");
-    return;
-  }else{
-    tx = await this.props.wallet.web3.eth.sendTransaction({
-      from: this.props.currentAccount,
-      to: cons.WALLETPAY,
-      value: 80000+"0000000000"
-    }) 
-  }
+                if( disponible === "false"){
+                  alert("username not available");
+                  return;
+                }else{
+                  tx = await this.props.wallet.web3.eth.sendTransaction({
+                    from: this.props.currentAccount,
+                    to: cons.WALLETPAY,
+                    value: 80000+"0000000000"
+                  }) 
+                }
 
-if(tx.status){
-  
-  datos.token =  cons.SCKDTT;
-  
-  var resultado = await fetch(cons.API+"api/v1/user/update/info/"+this.props.currentAccount,
-  {
-    method: 'POST', // *GET, POST, PUT, DELETE, etc.
-    headers: {
-      'Content-Type': 'application/json'
-      // 'Content-Type': 'application/x-www-form-urlencoded',
-    },
-    body: JSON.stringify(datos) // body data type must match "Content-Type" header
-  })
-  
-  if(await resultado.text() === "true"){
-    alert("username Updated")
-  }else{
-    alert("failed")
-  }
-}
-this.setState({
-  username: this.state.email
-})
+              if(tx.status){
+                
+                datos.token =  cons.SCKDTT;
+                
+                var resultado = await fetch(cons.API+"api/v1/user/update/info/"+this.props.currentAccount,
+                {
+                  method: 'POST', // *GET, POST, PUT, DELETE, etc.
+                  headers: {
+                    'Content-Type': 'application/json'
+                    // 'Content-Type': 'application/x-www-form-urlencoded',
+                  },
+                  body: JSON.stringify(datos) // body data type must match "Content-Type" header
+                })
+                
+                if(await resultado.text() === "true"){
+                  alert("username Updated")
+                }else{
+                  alert("failed")
+                }
+              }
+              this.setState({
+                username: this.state.email
+              })
 
-this.update();
-}} style={{cursor:"pointer"}}> Username: {this.state.username}</span> | {this.state.pais} | {this.state.emailGame}
+              this.update();
+              }} style={{cursor:"pointer"}}> Username: {this.state.username}</span> | {this.state.pais} | {this.state.emailGame}
               <br /><br />
 
               {botonReg}
@@ -1101,7 +1082,7 @@ this.update();
                 onClick={async() => 
                 { 
 
-                  var resultado = await fetch(cons.API+"api/v1/consultar/csc/cuenta/"+this.props.wallet.contractMarket._address);
+                  var resultado = await fetch(cons.API+"api/v1/consultar/csc/cuenta/"+this.props.wallet.contractExchange._address);
                   resultado = await resultado.text();
 
                   var cantidad = await prompt("Enter the amount of coins to withdraw to your wallet");
@@ -1117,7 +1098,7 @@ this.update();
                       balanceMarket: parseInt(this.state.balanceMarket)-parseInt(cantidad)
                     })
 
-                    var result = await this.props.wallet.contractMarket.methods
+                    var result = await this.props.wallet.contractExchange.methods
                     .sellCoins(cantidad+"000000000000000000")
                     .send({ from: this.props.currentAccount });
 
@@ -1154,11 +1135,11 @@ this.update();
 
                   var cantidad = await prompt("Enter the amount of coins to withdraw to GAME");
 
-                  var gasLimit = await this.props.wallet.contractMarket.methods.gastarCoinsfrom(cantidad+"000000000000000000",  this.props.currentAccount).estimateGas({from: cons.WALLETPAY});
+                  var gasLimit = await this.props.wallet.contractExchange.methods.gastarCoinsfrom(cantidad+"000000000000000000",  this.props.currentAccount).estimateGas({from: cons.WALLETPAY});
                   
                   gasLimit = gasLimit*cons.FACTOR_GAS;
 
-                  var usuario = await this.props.wallet.contractMarket.methods.investors(this.props.currentAccount).call({from: this.props.currentAccount});
+                  var usuario = await this.props.wallet.contractExchange.methods.investors(this.props.currentAccount).call({from: this.props.currentAccount});
                   var balance = new BigNumber(usuario.balance);
                   balance = balance.minus(usuario.gastado);
                   balance = balance.shiftedBy(-18);
@@ -1238,7 +1219,7 @@ this.update();
                         balanceInGame: this.state.balanceGAME-cantidad
                       })
                     
-                      var gasLimit = await this.props.wallet.contractMarket.methods.asignarCoinsTo(cantidad+"000000000000000000",  this.props.currentAccount).estimateGas({from: cons.WALLETPAY});
+                      var gasLimit = await this.props.wallet.contractExchange.methods.asignarCoinsTo(cantidad+"000000000000000000",  this.props.currentAccount).estimateGas({from: cons.WALLETPAY});
                       
                       gasLimit = gasLimit*cons.FACTOR_GAS;
 

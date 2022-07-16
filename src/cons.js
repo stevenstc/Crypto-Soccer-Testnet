@@ -25,8 +25,8 @@ if(TESTNET){
     SC = "0xCB553b2128fAb586E8C6601983cdb134eaBdd989";//"0xfF7009EF7eF85447F6A5b3f835C81ADd60a321C9";// contrato test market
     SC2 = "0xC4cC639697DBA2802386386279927C5b894Ec7a7";// contrado test fan youtuber
     SC3 = "0xebCC8F716087B6Bd4AF31759B8F7041ebEC5E820";// contrado test Staking
-    SC5 = "0x875568aAd256AB48E8bDc7bCb72C302E78e2C78E"; // Inventario
-    SC6 = "0x1E07926bDCca0d9DE24DFbD323ac5927fB56e4C6"; // Exchange
+    SC5 = "0xEeAB65c0e3076985E2aDBd8119D8e5B4784185c5"; // Inventario
+    SC6 = "0x082621b836f5212731Ea2c6849f4D91813169B72"; // Exchange
     chainId = '0x61';
     API = "https://brutustronstaking.tk/csc-testnet/";
     WALLETPAY = "0x0c4c6519E8B6e4D9c99b09a3Cda475638c930b00";

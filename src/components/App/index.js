@@ -10,13 +10,13 @@ import Staking from "../HomeStaking"
 import TronLinkGuide from "../TronLinkGuide";
 import cons from "../../cons"
 
-import abiToken from "../../token";
-import abiMarket from "../../market";
-import abiInventario from "../../inventario";
-
-import abiFan from "../../fan"
-import abiStaking from "../../staking"
-import abiFaucet from "../../faucet"
+import abiToken from "../../abi/token";
+import abiMarket from "../../abi/market";
+import abiInventario from "../../abi/inventario";
+import abiFan from "../../abi/fan"
+import abiStaking from "../../abi/staking"
+import abiFaucet from "../../abi/faucet"
+import abiExchange from "../../abi/exchange"
 
 //const delay = (s) => new Promise((res) => setTimeout(res, s*1000));
 
@@ -127,6 +127,10 @@ class App extends Component {
           abiInventario,
           cons.SC5
         )
+        var contractExchange = new web3.eth.Contract(
+          abiExchange,
+          cons.SC6
+        )
 
         var loc = document.location.href;
         var walletconsulta = "0x0000000000000000000000000000000000000000"
@@ -137,7 +141,6 @@ class App extends Component {
           walletconsulta = walletconsulta.split('#')[0];
           walletconsulta = walletconsulta.split('=')[1];
           
-
         }
 
         this.setState({
@@ -149,7 +152,8 @@ class App extends Component {
             contractFan: contractFan,
             contractStaking: contractStaking,
             contractFaucet: contractFaucet,
-            contractInventario: contractInventario
+            contractInventario: contractInventario,
+            contractExchange: contractExchange
           }
         })
   

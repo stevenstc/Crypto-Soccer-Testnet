@@ -122,7 +122,7 @@ export default class Market extends Component {
           loading: true
         });
   
-        var itemsMarket = [];
+        itemsMarket = [];
   
         var _items = await this.props.wallet.contractInventario.methods
         .verItemsMarket()

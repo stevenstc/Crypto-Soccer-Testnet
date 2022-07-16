@@ -108,7 +108,7 @@ contract Inventario is Admin{
   uint256[] public FEE_CSC = [100 * 10**18,100 * 10**18,100 * 10**18];
  
   address public token = 0xF0fB4a5ACf1B1126A991ee189408b112028D7A63;
-  address public adminWallet = 0x004769eF6aec57EfBF56c24d0A04Fe619fBB6143;
+  address public walletExchange = 0xF0fB4a5ACf1B1126A991ee189408b112028D7A63;
 
   TRC20_Interface CSC_Contract = TRC20_Interface(token);
   TRC20_Interface OTRO_Contract = TRC20_Interface(token);
@@ -119,7 +119,6 @@ contract Inventario is Admin{
   mapping (address => uint256[]) public market;
   mapping (address => address[]) public market_token;
   mapping (address => uint256[]) public market_price;
-
 
   string[] public items;
   bool[] public comprable;
@@ -154,7 +153,7 @@ contract Inventario is Admin{
       if(!token_Contract.transferFrom(msg.sender, WALLETS_FEE[index], FEE_CSC[index]))revert();
     }
 
-    if(!token_Contract.transferFrom(msg.sender, address(this), precio[_item]))revert();
+    if(!token_Contract.transferFrom(msg.sender, walletExchange, precio[_item]))revert();
 
     almacen[msg.sender].push(_item);
       
@@ -175,7 +174,7 @@ contract Inventario is Admin{
 
     }
 
-    almacen[msg.sender].push(_item);
+    almacen[msg.sender].push(market[_user][_item]);
 
     market[_user][_item] = market[_user][market[_user].length - 1];
     market[_user].pop();
@@ -189,20 +188,19 @@ contract Inventario is Admin{
 
   function SellItemFromMarket( uint256 _item,address _token, uint256 _price) public {
 
-    if(!sellItems || baneado[msg.sender] )revert();
+    if(!sellItems || baneado[msg.sender] || comprable[almacen[msg.sender][_item]])revert();
 
     for (uint256 index = 0; index < WALLETS_FEE.length; index++) {
       if(!CSC_Contract.transferFrom(msg.sender, WALLETS_FEE[index], FEE_CSC[index]))revert();
     }
 
-    market[msg.sender].push(_item);
+    market[msg.sender].push(almacen[msg.sender][_item]);
     market_price[msg.sender].push(_price);
     market_token[msg.sender].push(_token);
 
     almacen[msg.sender][_item] = almacen[msg.sender][almacen[msg.sender].length - 1];
     almacen[msg.sender].pop();
     
-      
   }
 
    function addItemToMarket( address _user, uint256 _item) public onlyAdmin{
@@ -284,28 +282,26 @@ contract Inventario is Admin{
   function ChangeTokenOTRO(address _tokenERC20) public onlyOwner returns (bool){
 
     OTRO_Contract = TRC20_Interface(_tokenERC20);
-
     return true;
 
+  }
+
+  function ChangeExchange(address _wallet) public onlyOwner {
+    walletExchange = _wallet;
   }
 
   function redimTokenPrincipal01() public onlyOwner returns (uint256){
 
     if ( CSC_Contract.balanceOf(address(this)) <= 0)revert();
-
     uint256 valor = CSC_Contract.balanceOf(address(this));
-
     CSC_Contract.transfer(owner, valor);
-
     return valor;
   }
 
   function redimTokenPrincipal02(uint256 _value) public onlyOwner returns (uint256) {
 
     if ( CSC_Contract.balanceOf(address(this)) < _value)revert();
-
     CSC_Contract.transfer(owner, _value);
-
     return _value;
 
   }
@@ -313,20 +309,15 @@ contract Inventario is Admin{
   function redimOTRO() public onlyOwner returns (uint256){
 
     if ( OTRO_Contract.balanceOf(address(this)) <= 0)revert();
-
     uint256 valor = OTRO_Contract.balanceOf(address(this));
-
     OTRO_Contract.transfer(owner, valor);
-
     return valor;
   }
 
   function redimETH() public onlyOwner returns (uint256){
 
     if ( address(this).balance <= 0)revert();
-
     owner.transfer(address(this).balance);
-
     return address(this).balance;
 
   }

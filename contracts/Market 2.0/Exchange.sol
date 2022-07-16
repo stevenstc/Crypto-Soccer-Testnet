@@ -2,47 +2,46 @@ pragma solidity >=0.8.0;
 // SPDX-License-Identifier: Apache 2.0
 
 interface TRC20_Interface {
-
-    function allowance(address _owner, address _spender) external view returns (uint remaining);
-    function transferFrom(address _from, address _to, uint _value) external returns (bool);
-    function transfer(address direccion, uint cantidad) external returns (bool);
-    function balanceOf(address who) external view returns (uint256);
-    function decimals() external view returns(uint);
+  function allowance(address _owner, address _spender) external view returns (uint remaining);
+  function transferFrom(address _from, address _to, uint _value) external returns (bool);
+  function transfer(address direccion, uint cantidad) external returns (bool);
+  function balanceOf(address who) external view returns (uint256);
+  function decimals() external view returns(uint);
 }
 
 library SafeMath {
 
-    function mul(uint a, uint b) internal pure returns (uint) {
-        if (a == 0) {
-            return 0;
-        }
-
-        uint c = a * b;
-        require(c / a == b);
-
-        return c;
+  function mul(uint a, uint b) internal pure returns (uint) {
+    if (a == 0) {
+        return 0;
     }
 
-    function div(uint a, uint b) internal pure returns (uint) {
-        require(b > 0);
-        uint c = a / b;
+    uint c = a * b;
+    require(c / a == b);
 
-        return c;
-    }
+    return c;
+  }
 
-    function sub(uint a, uint b) internal pure returns (uint) {
-        require(b <= a);
-        uint c = a - b;
+  function div(uint a, uint b) internal pure returns (uint) {
+    require(b > 0);
+    uint c = a / b;
 
-        return c;
-    }
+    return c;
+  }
 
-    function add(uint a, uint b) internal pure returns (uint) {
-        uint c = a + b;
-        require(c >= a);
+  function sub(uint a, uint b) internal pure returns (uint) {
+    require(b <= a);
+    uint c = a - b;
 
-        return c;
-    }
+    return c;
+  }
+
+  function add(uint a, uint b) internal pure returns (uint) {
+    uint c = a + b;
+    require(c >= a);
+
+    return c;
+  }
 
 }
 
@@ -98,11 +97,10 @@ contract Admin is Ownable{
 
 }
 
-contract Market_V2 is Admin{
+contract Exchange is Admin{
   using SafeMath for uint256;
 
   address public token = 0xF0fB4a5ACf1B1126A991ee189408b112028D7A63;
-  address public adminWallet = 0x004769eF6aec57EfBF56c24d0A04Fe619fBB6143;
 
   uint256 public MIN_CSC = 500 * 10**18;
   uint256 public MAX_CSC = 10000 * 10**18;
@@ -121,8 +119,8 @@ contract Market_V2 is Admin{
 
   mapping (address => Investor) public investors;
 
-  uint256 ingresos;
-  uint256 retiros;
+  uint256 public ingresos;
+  uint256 public retiros;
 
   constructor() {
 
@@ -157,25 +155,29 @@ contract Market_V2 is Admin{
 
   function sellCoins(uint256 _value) public returns (bool) {
 
-      if(_value < MIN_CSC)revert();
-      if(_value > MAX_CSC)revert();
-      Investor storage usuario = investors[msg.sender];
+    if(_value < MIN_CSC)revert();
+    if(_value > MAX_CSC)revert();
+    Investor storage usuario = investors[msg.sender];
 
-      if(block.timestamp > usuario.payAt.add(TIME_CLAIM))revert();
+    if(block.timestamp > usuario.payAt.add(TIME_CLAIM))revert();
 
-      if (usuario.baneado) revert();
-      if (_value > usuario.balance)revert();
+    if (usuario.baneado) revert();
+    if (_value > usuario.balance)revert();
 
-      if (!CSC_Contract.transfer(msg.sender,  _value))revert();
+    if(FEE_CSC != 0){
+      if (_value.sub(FEE_CSC) < 0)revert();
+    }
 
-      usuario.balance -= _value;
-      retiros += _value;
-      usuario.payAt = block.timestamp;
+    if (!CSC_Contract.transfer(msg.sender,  _value.sub(FEE_CSC)))revert();
 
-      return true;
+    usuario.balance -= _value;
+    retiros += _value;
+    usuario.payAt = block.timestamp;
+
+    return true;
   }
 
-function gastarCoinsfrom(uint256 _value, address _user) public onlyAdmin returns(bool){
+  function gastarCoinsfrom(uint256 _value, address _user) public onlyAdmin returns(bool){
 
     Investor storage usuario = investors[_user];
 
@@ -190,6 +192,10 @@ function gastarCoinsfrom(uint256 _value, address _user) public onlyAdmin returns
   function updateMinMax(uint256 _min, uint256 _max)public onlyOwner{
     MIN_CSC = _min;
     MAX_CSC = _max;
+  }
+
+  function updateFee(uint256 _fee)public onlyOwner{
+    FEE_CSC = _fee;
   }
 
   function updateTimeToClaim(uint256 _time)public onlyOwner{
