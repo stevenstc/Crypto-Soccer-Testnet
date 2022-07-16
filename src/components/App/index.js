@@ -4,6 +4,7 @@ import Web3 from "web3";
 
 import Home from "../V1Home";
 import Market from "../Market";
+import MarketV2 from "../MarketV2";
 import Fan from "../HomeFan";
 import Staking from "../HomeStaking"
 import TronLinkGuide from "../TronLinkGuide";
@@ -126,9 +127,21 @@ class App extends Component {
           abiInventario,
           cons.SC5
         )
-        
-  
+
+        var loc = document.location.href;
+        var walletconsulta = "0x0000000000000000000000000000000000000000"
+
+        if(loc.indexOf('?')>0){
+                  
+          walletconsulta = loc.split('?')[1];
+          walletconsulta = walletconsulta.split('#')[0];
+          walletconsulta = walletconsulta.split('=')[1];
+          
+
+        }
+
         this.setState({
+          walletconsulta: walletconsulta,
           binanceM:{
             web3: web3,
             contractToken: contractToken,
@@ -155,7 +168,6 @@ class App extends Component {
 
   render() {
 
-    
       var getString = "";
       var loc = document.location.href;
       //console.log(loc);
@@ -163,9 +175,10 @@ class App extends Component {
                 
         getString = loc.split('?')[1];
         getString = getString.split('#')[0];
-  
+        getString = getString.split('=')[0];
+        
       }
-  
+
       if (!this.state.metamask) return (<TronLinkGuide />);
   
       if (!this.state.conectado) return (<TronLinkGuide installed />);
@@ -181,6 +194,8 @@ class App extends Component {
             return(<Staking wallet={this.state.binanceM} currentAccount={this.state.currentAccount}/>);
           case "market":
             return(<Market wallet={this.state.binanceM} currentAccount={this.state.currentAccount}/>);
+          case "market-v2":
+            return(<MarketV2 wallet={this.state.binanceM} currentAccount={this.state.currentAccount} consulta={this.state.walletconsulta}/>);
           default:
             return(<Home wallet={this.state.binanceM} currentAccount={this.state.currentAccount}/>);
         }

@@ -8,7 +8,7 @@ export default class Market extends Component {
     this.state = {
       loading: false,
       inventario: [],
-      itemsYoutube: [(
+      itemsMarket: [(
         <div className="col-lg-12 p-3 mb-5 text-center monedas position-relative" key={`items-0`}>
           <h2 className=" pb-2">Loading... please wait</h2>
         </div>
@@ -46,8 +46,6 @@ export default class Market extends Component {
 
     balance = new BigNumber(balance).shiftedBy(-18).toString(10);
 
-    //console.log(balance)
-
     this.setState({
       balance: balance
     });
@@ -65,17 +63,12 @@ export default class Market extends Component {
     aprovado = new BigNumber(aprovado).shiftedBy(-18).decimalPlaces(2).toNumber(10);
 
     /*
-
     var balance = await this.props.wallet.contractToken.methods
     .balanceOf(this.props.currentAccount)
     .call({ from: this.props.currentAccount });
 
-    balance = new BigNumber(balance);
-    balance = balance.shiftedBy(-18);
-    balance = balance.decimalPlaces(0).toNumber();
+    balance = new BigNumber(balance).shiftedBy(-18).decimalPlaces(0).toNumber();
     */
-
-    console.log(aprovado);
 
     if(aprovado > 0){
 
@@ -158,7 +151,7 @@ export default class Market extends Component {
         loading: true
       });
 
-      var itemsYoutube = [];
+      var itemsMarket = [];
       var listItems = [];
 
       var _items = await this.props.wallet.contractInventario.methods
@@ -179,7 +172,7 @@ export default class Market extends Component {
         }
         listItems[index]= item;
         //console.log(item)
-        itemsYoutube[index] = (
+        itemsMarket[index] = (
             <div className="col-lg-3 col-md-6 p-3 mb-5 text-center monedas position-relative border" key={`items-${index}`}>
               <h2 className=" pb-2"> {(_items[0][index]).replace(/-/g," ").replace("comun", "common").replace("formacion","formation").replace("epico","epic").replace("legendario","legendary")}</h2>
               <img
@@ -212,7 +205,7 @@ export default class Market extends Component {
       }
 
       this.setState({
-        itemsYoutube: itemsYoutube,
+        itemsMarket: itemsMarket,
         loading: false
       });
     }
@@ -265,7 +258,7 @@ export default class Market extends Component {
               <h2 className=" pb-4">Items</h2>
             </div>
 
-            {this.state.itemsYoutube}
+            {this.state.itemsMarket}
 
           </div>
         </div>

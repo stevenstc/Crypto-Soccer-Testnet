@@ -255,10 +255,7 @@ export default class Home extends Component {
         .balanceOf(this.props.currentAccount)
         .call({ from: this.props.currentAccount });
 
-    balance = new BigNumber(balance);
-    balance = balance.shiftedBy(-18);
-    balance = balance.decimalPlaces(6)
-    balance = balance.toString();
+    balance = new BigNumber(balance).shiftedBy(-18).toString(10);
 
     //console.log(balance)
 
@@ -430,23 +427,16 @@ export default class Home extends Component {
       .allowance(this.props.currentAccount, this.props.wallet.contractMarket._address)
       .call({ from: this.props.currentAccount });
 
-    aprovado = new BigNumber(aprovado);
-    aprovado = aprovado.shiftedBy(-18);
-    aprovado = aprovado.decimalPlaces(2).toNumber();
+    aprovado = new BigNumber(aprovado).shiftedBy(-18).decimalPlaces(2).toNumber();
 
     var balance = await this.props.wallet.contractToken.methods
     .balanceOf(this.props.currentAccount)
     .call({ from: this.props.currentAccount });
 
-    balance = new BigNumber(balance);
-    balance = balance.shiftedBy(-18);
-    balance = balance.decimalPlaces(2).toNumber();
+    balance = new BigNumber(balance).shiftedBy(-18).decimalPlaces(2).toNumber();
 
-    var compra;
-    compra = amount+"000000000000000000";
-    amount = new BigNumber(amount);
-
-    amount = amount.decimalPlaces(2).toNumber();
+    var compra = amount+"000000000000000000";
+    amount = new BigNumber(amount).decimalPlaces(2).toNumber();
 
     if(aprovado > 0){
 
@@ -498,7 +488,31 @@ export default class Home extends Component {
 
             <div className="col-md-3 p-1" key={`itemsTeam-${index}`}>
               <img className="pb-4" src={"assets/img/" + nombres_items[0][result[index]] + ".png"} width="100%" alt={"team-"+nombres_items[0][result[index]]} />
-              <button className="btn btn-danger" onClick={()=>{alert("common not sell")}}>Sell item</button>
+              <button className="btn btn-danger" onClick={async()=>{
+
+                var aprovado = await this.props.wallet.contractToken.methods
+                .allowance(this.props.currentAccount, this.props.wallet.contractInventario._address)
+                .call({ from: this.props.currentAccount });
+
+                aprovado = new BigNumber(aprovado).shiftedBy(-18).decimalPlaces(2).toNumber();
+
+                if(aprovado <= 0){
+
+                  alert("insuficient aproved balance")
+                  await this.props.wallet.contractToken.methods
+                  .approve(this.props.wallet.contractInventario._address, "115792089237316195423570985008687907853269984665640564039457584007913129639935")
+                  .send({ from: this.props.currentAccount });
+
+                }
+
+
+                var price = prompt("set price",5000)
+                price = new BigNumber(price).shiftedBy(18).toString(10);
+                await this.props.wallet.contractInventario.methods
+                .SellItemFromMarket( index,this.props.wallet.contractToken._address, price)
+                .send({ from: this.props.currentAccount })
+                this.update();
+                }}>Sell item</button>
             </div>
 
           )
@@ -514,10 +528,7 @@ export default class Home extends Component {
       .migrado(this.props.currentAccount)
       .call({ from: this.props.currentAccount });
 
-      console.log(largoInventario)
-
       if(largoInventario > 0 && !migrado){
-        console.log("entro")
 
         var old_inventario = [];
 
@@ -526,20 +537,25 @@ export default class Home extends Component {
           .inventario(this.props.currentAccount,index)
           .call({ from: this.props.currentAccount });
 
-          if(nombres_items[0].indexOf(temp.nombre) != -1){
+          if(nombres_items[0].indexOf(temp.nombre) !== -1){
             old_inventario[index] = nombres_items[0].indexOf(temp.nombre);  
 
           }
 
         }
 
-        console.log(old_inventario);
-
         inventario = (
           <><button className="btn btn-warning" onClick={()=>{
-            this.props.wallet.contractInventario.methods
-            .migrar([0,1,2,3,4,5])
-            .send({ from: this.props.currentAccount });
+            if(old_inventario.length > 0){
+              this.props.wallet.contractInventario.methods
+              .migrar(old_inventario)
+              .send({ from: this.props.currentAccount });
+
+            }else{
+              alert("try again latter");
+            }
+            this.update();
+            
         }}>Migrate teams to V2</button>
           </>
         )
@@ -562,16 +578,23 @@ export default class Home extends Component {
     .verItemsMarket()
     .call({ from: this.props.currentAccount });
 
-
     var inventario = []
 
-    for (let index = 0; index < result.length; index++) {
+    for (let index = 0; index < result[0].length; index++) {
 
         inventario[index] = (
 
           <div className="col-md-3 p-1" key={`itemsTeam-${index}`}>
-            <img className="pb-4" src={"assets/img/" + nombres_items[0][result[index]] + ".png"} width="100%" alt={"team-"+nombres_items[0][result[index]]} />
-            <button className="btn btn-warning">Back inventory</button>
+            <img className="pb-4" src={"assets/img/" + nombres_items[0][result[0][index]] + ".png"} width="100%" alt={"team-"+nombres_items[0][result[0][index]]} />
+            <p>Price: {new BigNumber(result[1][index]).shiftedBy(-18).toString(10)} CSC</p>
+            <button className="btn btn-warning" onClick={async()=>{
+              
+              await this.props.wallet.contractInventario.methods
+              .buyItemFromMarket(this.props.currentAccount, index)
+              .send({ from: this.props.currentAccount });
+
+              this.update();
+            }}>Back to inventory</button>
           </div>
 
         )
@@ -1304,7 +1327,17 @@ this.update();
 
           <div style={{ marginTop: "30px" }} className="row text-center">
             <div className="col-md-12">
-              <h3>Market for sell</h3>{" "}
+              <h3>Market for sell</h3>
+              <h3>link: <a id="id_elemento" href={document.location+"?market-v2="+this.props.currentAccount}>{document.location+"?market-v2="+this.props.currentAccount}</a></h3>
+              <button className="btn btn-info" onClick={()=>{
+                 var aux = document.createElement("input");
+                 aux.setAttribute("value", document.getElementById("id_elemento").innerHTML);
+                 document.body.appendChild(aux);
+                 aux.select();
+                 document.execCommand("copy");
+                 document.body.removeChild(aux);
+                 alert("Copied!")
+              }}> Copy </button>
               
             </div>
           </div>
