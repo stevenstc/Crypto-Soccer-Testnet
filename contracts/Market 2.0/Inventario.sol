@@ -2,19 +2,18 @@ pragma solidity >=0.8.0;
 // SPDX-License-Identifier: Apache 2.0
 
 interface TRC20_Interface {
-
-    function allowance(address _owner, address _spender) external view returns (uint remaining);
-    function transferFrom(address _from, address _to, uint _value) external returns (bool);
-    function transfer(address direccion, uint cantidad) external returns (bool);
-    function balanceOf(address who) external view returns (uint256);
-    function decimals() external view returns(uint);
+  function allowance(address _owner, address _spender) external view returns (uint remaining);
+  function transferFrom(address _from, address _to, uint _value) external returns (bool);
+  function transfer(address direccion, uint cantidad) external returns (bool);
+  function balanceOf(address who) external view returns (uint256);
+  function decimals() external view returns(uint);
 }
 
 library SafeMath {
 
   function mul(uint a, uint b) internal pure returns (uint) {
     if (a == 0) {
-        return 0;
+      return 0;
     }
 
     uint c = a * b;
@@ -108,7 +107,7 @@ contract Inventario is Admin{
   uint256[] public FEE_CSC = [100 * 10**18,100 * 10**18,100 * 10**18];
  
   address public token = 0xF0fB4a5ACf1B1126A991ee189408b112028D7A63;
-  address public walletExchange = 0xF0fB4a5ACf1B1126A991ee189408b112028D7A63;
+  address public walletExchange = 0x907c4eADcd829Eff4084E6615bf6651938DE56C6;
 
   TRC20_Interface CSC_Contract = TRC20_Interface(token);
   TRC20_Interface OTRO_Contract = TRC20_Interface(token);
@@ -182,7 +181,6 @@ contract Inventario is Admin{
     market_price[_user].pop();
     market_token[_user][_item] = market_token[_user][market_token[_user].length - 1];
     market_token[_user].pop();
-    
       
   }
 
@@ -211,7 +209,7 @@ contract Inventario is Admin{
       
   }
 
-  function SubItemfromMarket( address _user, uint256 _item) public {
+  function SubItemfromMarket( address _user, uint256 _item) public onlyAdmin {
 
     if( baneado[_user] )revert();
     almacen[_user][_item] = almacen[_user][almacen[_user].length - 1];
@@ -265,6 +263,14 @@ contract Inventario is Admin{
     buyItems = _truefalse;
   }
 
+  function updateSellItems(bool _truefalse)public onlyOwner{
+    sellItems = _truefalse;
+  }
+
+  function updateMigracion(bool _truefalse)public onlyOwner{
+    migracion = _truefalse;
+  }
+
   function updateWalletsFee(address[] memory _wallets, uint256[] memory _valores)public onlyOwner{
     WALLETS_FEE = _wallets;
     FEE_CSC = _valores;
@@ -314,7 +320,7 @@ contract Inventario is Admin{
     return valor;
   }
 
-  function redimETH() public onlyOwner returns (uint256){
+  function redimBNB() public onlyOwner returns (uint256){
 
     if ( address(this).balance <= 0)revert();
     owner.transfer(address(this).balance);

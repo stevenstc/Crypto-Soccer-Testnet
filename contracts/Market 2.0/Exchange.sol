@@ -141,15 +141,10 @@ contract Exchange is Admin{
   }
 
   function asignarCoinsTo(uint256 _value, address _user) public onlyAdmin returns(bool){
-
     Investor storage usuario = investors[_user];
-
     if ( usuario.baneado) revert();
-      
     usuario.balance += _value;
-
     return true;
-      
     
   }
 
@@ -203,60 +198,42 @@ contract Exchange is Admin{
   }
 
   function ChangePrincipalToken(address _tokenERC20) public onlyOwner returns (bool){
-
     CSC_Contract = TRC20_Interface(_tokenERC20);
     token = _tokenERC20;
-
     return true;
 
   }
 
   function ChangeTokenOTRO(address _tokenERC20) public onlyOwner returns (bool){
-
     OTRO_Contract = TRC20_Interface(_tokenERC20);
-
     return true;
 
   }
 
   function redimTokenPrincipal() public onlyOwner returns (uint256){
-
     if ( CSC_Contract.balanceOf(address(this)) <= 0)revert();
-
     uint256 valor = CSC_Contract.balanceOf(address(this));
-
     CSC_Contract.transfer(owner, valor);
-
     return valor;
   }
 
   function redimTokenPrincipal02(uint256 _value) public onlyOwner returns (uint256) {
-
     if ( CSC_Contract.balanceOf(address(this)) < _value)revert();
-
     CSC_Contract.transfer(owner, _value);
-
     return _value;
 
   }
 
   function redimOTRO() public onlyOwner returns (uint256){
-
     if ( OTRO_Contract.balanceOf(address(this)) <= 0)revert();
-
     uint256 valor = OTRO_Contract.balanceOf(address(this));
-
     OTRO_Contract.transfer(owner, valor);
-
     return valor;
   }
 
   function redimBNB() public onlyOwner returns (uint256){
-
     if ( address(this).balance <= 0)revert();
-
     owner.transfer(address(this).balance);
-
     return address(this).balance;
 
   }

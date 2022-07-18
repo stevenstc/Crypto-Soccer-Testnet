@@ -5,8 +5,8 @@ var SC3 = "0x99dB6D082E5abD682dC8F4791F10FB39Bc334a9c";// Staking
 
 const SC4 = "0xe5578751439d52cf9958c4cf1A91eeb3b11F854C";// Faucet Testent
 
-var SC5 = "0x99dB6D082E5abD682dC8F4791F10FB39Bc334a9c";// Inventario
-var SC6 = "0xf0218bbd50ddf065b7a43862fd9e27ee1925c050";// Exchange
+var SC5 = "0x16Da4914542574F953b31688f20f1544d4E89537";// Inventario
+var SC6 = "0x907c4eADcd829Eff4084E6615bf6651938DE56C6";// Exchange
 
 
 var chainId = '0x38';
